@@ -17,47 +17,36 @@ class TimeAnnouncement:
 
 
 # Banana Time Variables
-# global appBananaTime
 bananaTime = datetime.time(15, 30, 0)
 
-# global morningAnnouncementTime
 morningAnnouncementTime = datetime.time(10, 30, 0)
 
-# global announcements
-announcements = [
-    MinsUntilAnnouncement(60, "60 mins test"),
-    MinsUntilAnnouncement(30, "30 mins test")
-]
+announcements = {
+    60: MinsUntilAnnouncement(60, "60 mins test"),
+    30: MinsUntilAnnouncement(30, "30 mins test")
+}
 
 
-# Define Logger Functions
-logger = logging.getLogger('script_logger')
+# Banana Time Functions
+def setBananaTime(time):
+    globals()['bananaTime'] = time
+    # Probs need code here to update all minBefore announcements
 
-def log(err, msg) -> None:
-    """Log messages that are parsed through the parameter
-    
-    Keyword arguments:
-    err -- error message
-    msg -- message to display
-    """
-    if err is not None:
-        logger.error("Failed to deliver message: %s: %s" % (str(msg), str(err)))
+def setMorningAnnouncementTime(time):
+    globals()['morningAnnouncementTime'] = time
+
+def addMinsBeforeAnnouncement(minsBefore, message):
+    mins = int(minsBefore)
+    if mins in announcements:
+        app.logger.warning("Cannot add new announcement as one already exists for " + str(mins) + " minutes before")
+        # TODO Somehow alert the user of this
     else:
-        logger.info("Message produced: %s" % (str(msg)))
+        announcements[mins] = MinsUntilAnnouncement(mins, message)
+        app.logger.info("Added new announcement " + str(mins) + " minutes before banana time")
 
-def create_logger(logging_level):
-    """Create the logger to use within the program
-    
-    Keyword arguments:
-    logging_level -- level at which to log the message, i.e. DEBUG, INFO, WARN, ERROR.
-    """
-    logger.setLevel(logging_level)
-    handler = logging.StreamHandler()
-    handler.setFormatter(
-        logging.Formatter('%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s'))
-    logger.addHandler(handler)
-
-create_logger(logging.DEBUG)
+def removeMinsBeforeAnnouncement(minsBefore):
+    announcements.pop(int(minsBefore))
+    app.logger.info("Removed announcement for " + str(minsBefore) + " minutes before banana time")
 
 
 # Flask Routes
@@ -67,15 +56,21 @@ app = Flask(__name__)
 def home():
     if request.method == 'POST':
         formId = request.form['formId']
-        logger.debug("Form ID: " + str(formId))
+        app.logger.debug("Form ID: " + str(formId))
 
         if formId == 'bananaTime':
             setBananaTime(request.form['bananaTime'])
-            logger.info("New banana time: " + str(bananaTime))
+            app.logger.info("New banana time: " + str(bananaTime))
+
         elif formId == 'morningAnnouncementTime':
             setMorningAnnouncementTime(request.form['morningAnnouncementTime'])
-            logger.info("New morning announcemenet time: " + str(morningAnnouncementTime))
+            app.logger.info("New morning announcemenet time: " + str(morningAnnouncementTime))
+
+        elif formId == 'announcement':
+            addMinsBeforeAnnouncement(request.form['minsBefore'], request.form['message'])
         
+        elif formId == 'deleteAnnouncement':
+            removeMinsBeforeAnnouncement(request.form['minsBefore'])
 
         return redirect(url_for('home'))
 
@@ -87,14 +82,6 @@ def home():
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-
-def setBananaTime(time):
-    globals()['bananaTime'] = time
-    # Probs need code here to update all minBefore announcements
-
-def setMorningAnnouncementTime(time):
-    globals()['morningAnnouncementTime'] = time
 
 
 # Main
