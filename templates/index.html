@@ -65,13 +65,13 @@
                         <th>Announcement Message</th>
                         <th></th>
                     </tr>
-                    {% for key in announcements %}
+                    {% for key in minsBeforeAnnouncements %}
                     <tr>
                         <form method="POST">
                             <input type="hidden" name="formId" value="deleteAnnouncement">
-                            <input type="hidden" name="minsBefore" value="{{ announcements[key].minsBefore }}">
-                            <td>{{ announcements[key].minsBefore }}</td>
-                            <td>{{ announcements[key].text }}</td>
+                            <input type="hidden" name="minsBefore" value="{{ minsBeforeAnnouncements[key].minsBefore }}">
+                            <td>{{ minsBeforeAnnouncements[key].minsBefore }}</td>
+                            <td>{{ minsBeforeAnnouncements[key].text }}</td>
                             <td><button class="btn btn-danger">Delete</button></td>
                         </form>
                     </tr>
