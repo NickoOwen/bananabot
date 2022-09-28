@@ -3,6 +3,8 @@
 {% block body %}
 <div class="container">
     <h1>Welcome to Banana Bot!</h1>
+    <p>What started as one man's daily banana has taken the world by storm! As other colleagues began to join in the fun something magical began to stir behind the scenes. And thus, BananaBot (BB for short) was born.</p>
+
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vitae nisl nec risus tristique aliquam. Cras nec consequat dolor, sed volutpat odio. Nunc varius lectus quis enim convallis ultrices. Sed lorem orci, gravida id porta quis, condimentum sit amet libero. Duis sagittis porta finibus. Sed facilisis enim quis porttitor laoreet. Suspendisse aliquet finibus urna nec auctor. Sed tincidunt malesuada faucibus. Pellentesque eu mi in quam faucibus vulputate. Praesent vel odio maximus, congue metus mattis, dictum dolor.</p>
 
     <p>Vivamus lacinia interdum neque, id elementum tortor rhoncus quis. Quisque in tempus mi, ut pulvinar turpis. Nam consectetur metus quis velit pulvinar euismod. Pellentesque cursus iaculis congue. Sed et nisi in sem convallis accumsan. Morbi id faucibus nisi, ut hendrerit eros. Maecenas facilisis finibus ipsum, quis molestie urna venenatis vehicula. Duis mattis, lorem vel dapibus fringilla, urna felis vestibulum odio, ut finibus diam metus eu nunc. Nulla lobortis orci lorem, vel facilisis nunc ultricies sit amet. Donec est odio, mollis eu dui vel, ullamcorper pulvinar metus. Donec eu faucibus dui. In id volutpat lacus, ac suscipit enim. Nulla placerat pretium eros quis auctor. Aenean at tristique neque, a accumsan tellus. Etiam at metus sed ex fringilla commodo. Vestibulum imperdiet lorem non nulla imperdiet, a molestie dui ultrices.</p>
@@ -13,83 +15,38 @@
     
     <p>Cras sed massa sem. Duis congue volutpat elit. Proin molestie, lorem sed volutpat eleifend, massa libero dignissim est, at gravida justo lacus in tortor. Aenean et viverra nisl. Nulla a tincidunt ex. Ut et odio lacus. Nam vitae odio nulla. Proin lobortis risus vel malesuada euismod. Suspendisse faucibus diam quis nisi ultrices luctus. Cras posuere venenatis odio vel fringilla. Donec semper sagittis porttitor. Donec magna est, dictum a tellus quis, congue iaculis justo. Donec eget massa lobortis, elementum mi vel, feugiat mi. Mauris blandit nec leo sit amet lobortis</p>
 </div>
-<!-- <div class="container">
-    <div class="row">
-        <h1>Time Announcements</h1>
-        <div class="row g-3">
-            <form class="row" method="POST">
-                <input type="hidden" name="formId" value="bananaTime">
-                <label for="" class="form-label">Banana Time</label>
-                <div class="col-auto">
-                    <input class="form-control" type="time" name="bananaTime" value="{{ bananaTime }}">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary">Set</button>
-                </div>
-            </form>
-        </div>
 
-        <div class="row g-3">
-            <form class="row" method="POST">
-                <input type="hidden" name="formId" value="morningAnnouncementTime">
-                <label for="" class="form-label">Morning Announcement Time</label>
-                <div class="col-auto">
-                    <input class="form-control" type="time" name="morningAnnouncementTime" value="{{ morningAnnouncementTime }}">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary">Set</button>
-                </div>
-            </form>
-        </div>
+<hr>
+
+<div class="container">
+    <div class="row">
+        <h1>Banana Time will be at {{ bananaTime }} today!</h1>
     </div>
 </div>
 
-<br>
+<hr>
 
 <div class="container">
     <div class="col-xs-12">
-        <h1>Dynamic Announcements</h1>
-
-        <div class="row">
-            <form class="row" method="POST">
-                <input type="hidden" name="formId" value="announcement">
-                <div class="col-auto">
-                    <label for="" class="form-label">Minutes Before</label>
-                    <input class="form-control" type="number" name="minsBefore" min="1" max="1440" step="1" required>
-                </div>
-                <div class="mb-3">
-                    <label for="" class="form-label">Announcement Message</label>
-                    <textarea class="form-control" name="message" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <button class="btn btn-primary">Add</button>
-                </div>
-            </form>
-        </div>
-
-        <br>
-
+        <h1>Scheduled Announcements</h1>
         <div class="row g-3">
-            <h2>Scheduled</h2>
             <table class="table">
                 <tr>
-                    <th>Minutes Before</th>
+                    <th>Time</th>
                     <th>Announcement Message</th>
                     <th></th>
                 </tr>
+                <tr>
+                    <td>{{ morningAnnouncementTime }}</td>
+                </tr>
                 {% for key in minsBeforeAnnouncements %}
                 <tr>
-                    <form method="POST">
-                        <input type="hidden" name="formId" value="deleteAnnouncement">
-                        <input type="hidden" name="minsBefore" value="{{ minsBeforeAnnouncements[key].minsBefore }}">
-                        <td>{{ minsBeforeAnnouncements[key].minsBefore }}</td>
-                        <td>{{ minsBeforeAnnouncements[key].text }}</td>
-                        <td><button class="btn btn-danger">Delete</button></td>
-                    </form>
+                    <td>{{ minsBeforeAnnouncements[key].minsBefore }} Minutes Before</td>
+                    <td>{{ minsBeforeAnnouncements[key].text }}</td>
                 </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
-</div> -->
+</div>
 {% endblock %}
