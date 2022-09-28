@@ -3,7 +3,7 @@
 {% block body %}
     <div class="container">
         <div class="row">
-            <h1>Set-Time Announcements</h1>
+            <h1>Time Announcements</h1>
             <div class="row g-3">
                 <form class="row" method="POST">
                     <input type="hidden" name="formId" value="bananaTime">
@@ -80,4 +80,15 @@
             </div>
         </div>
     </div>
+
+    <!-- <form class="form-switch form-check" method="POST">
+        <input type="hidden" name="formId" value="status">
+        <label class="form-label">Active</label>
+        <p>{{ status }}</p>
+        {% if status %}
+            <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()" checked>
+        {% else %}
+            <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()">
+        {% endif %}
+    </form> -->
 {% endblock %}

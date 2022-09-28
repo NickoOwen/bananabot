@@ -19,15 +19,21 @@ class MinsBeforeAnnouncementWorker(Process):
 
     def run(self):
         while True:
-            time.sleep(10)
-            # currentTime = datetime.datetime.now()
-            # normalisedBananaTime = datetime.datetime.combine(datetime.date.today(), timeAnnouncements['bananaTime'].time)
-            # # time_delta = normalisedBananaTime - currentTime
-            # announcementTime = datetime.datetime.combine(datetime.date.today(), self.time)
-            # sleepTime = announcementTime - currentTime
-            # sleepTimeSeconds = sleepTime.seconds
-            # print("Sleeping for " + str(sleepTimeSeconds))
-            # time.sleep(sleepTimeSeconds)
+            currentTime = datetime.datetime.now()
+            normalisedBananaTime = datetime.datetime.combine(datetime.date.today(), timeAnnouncements['bananaTime'].time)
+            time_delta = normalisedBananaTime - currentTime
+            announcementTime = normalisedBananaTime - datetime.timedelta(minutes = self.minsBefore)
+            
+            sleepTime = announcementTime - currentTime
+            sleepTimeSeconds = sleepTime.seconds
+            # print("DEBUG Announcement for " + str(self.minsBefore) + " minutes before sleeping for seconds: " + str(sleepTimeSeconds))
+            time.sleep(sleepTimeSeconds)
+
+            print(self.text)
+            # curl chat app here with self.text
+
+            # Sleep until next day warning
+            time.sleep(1) # This is a hacky way to make it work
 
 class TimeAnnouncement:
     def __init__(self, time, text):
@@ -44,20 +50,24 @@ class TimeAnnouncementWorker(Process):
         while True:
             currentTime = datetime.datetime.now()
             normalisedBananaTime = datetime.datetime.combine(datetime.date.today(), timeAnnouncements['bananaTime'].time)
-            # time_delta = normalisedBananaTime - currentTime
+            
             announcementTime = datetime.datetime.combine(datetime.date.today(), self.time)
             
             sleepTime = announcementTime - currentTime
             sleepTimeSeconds = sleepTime.seconds
-            time.sleep(sleepTimeSeconds + 1)
+            print("DEBUG Announcement for " + str(self.time) + " sleeping for seconds: " + str(sleepTimeSeconds))
+            time.sleep(sleepTimeSeconds + 1) # Offset by 1 second
 
             print(self.text)
+            # curl chat app here with self.text
+
             # Sleep until next day warning
             time.sleep(1) # This is a hacky way to make it work
 
 
 # Banana Time Variables
 workers = []
+status = True # TODO Finish implementing status functionality. Determins whether or not the bot will send announcements
 
 timeAnnouncements = {
     "morningAnnouncement": TimeAnnouncement(datetime.time(10, 0, 0), "1030 announ"),
@@ -74,14 +84,11 @@ minsBeforeAnnouncements = {
 def start():
     for announcement in timeAnnouncements.values():
         worker = TimeAnnouncementWorker(announcement.time, announcement.text)
-        # Setting daemon to True will let the main thread exit even though the workers are blocking
-        # worker.daemon = True
         worker.start()
         workers.append(worker)
     
     for announcemenet in minsBeforeAnnouncements.values():
         worker = MinsBeforeAnnouncementWorker(announcemenet.minsBefore, announcemenet.text)
-        
         worker.start()
         workers.append(worker)
 
@@ -122,6 +129,13 @@ def removeMinsBeforeAnnouncement(minsBefore):
     minsBeforeAnnouncements.pop(int(minsBefore))
     app.logger.info("Removed announcement for " + str(minsBefore) + " minutes before banana time")
 
+def setStatus(newStatus):
+    status = newStatus
+    if newStatus:
+        app.logger.info("BananaBot is now Active")
+    else:
+        app.logger.info("BananaBot is now Inactive")
+
 
 # Flask Routes
 app = Flask(__name__)
@@ -134,24 +148,22 @@ def home():
 
         if formId == 'bananaTime':
             setBananaTime(request.form['bananaTime'])
-            # app.logger.info("New banana time: " + str(request.form['bananaTime']))
-
         elif formId == 'morningAnnouncementTime':
             setMorningAnnouncementTime(request.form['morningAnnouncementTime'])
-            # app.logger.info("New morning announcemenet time: " + str(morningAnnouncementTime))
-
         elif formId == 'announcement':
             addMinsBeforeAnnouncement(request.form['minsBefore'], request.form['message'])
-        
         elif formId == 'deleteAnnouncement':
             removeMinsBeforeAnnouncement(request.form['minsBefore'])
+        elif formId == 'status':
+            setStatus('status' in request.form)
 
         return redirect(url_for('home'))
 
     return render_template('index.html',
         bananaTime = timeAnnouncements['bananaTime'].time,
         morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
-        minsBeforeAnnouncements = minsBeforeAnnouncements)
+        minsBeforeAnnouncements = minsBeforeAnnouncements,
+        status = status)
 
 @app.route('/about')
 def about():
