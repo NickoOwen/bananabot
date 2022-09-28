@@ -4,6 +4,24 @@ import requests
 import logging
 from multiprocessing import Process
 from flask import Flask, render_template, request, redirect, url_for
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# Authentication
+auth = HTTPBasicAuth()
+
+user = 'user'
+pw = 'secretpassword'
+
+users = {
+    user: generate_password_hash(pw)
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users:
+        return check_password_hash(users.get(username), password)
+    return False
 
 # Classes
 class MinsBeforeAnnouncement:
@@ -140,12 +158,25 @@ def setStatus(newStatus):
 # Flask Routes
 app = Flask(__name__)
 
-@app.route('/', methods=('GET', 'POST'))
+@app.route('/')
 def home():
+
+    return render_template('index.html',
+        bananaTime = timeAnnouncements['bananaTime'].time,
+        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
+        minsBeforeAnnouncements = minsBeforeAnnouncements,
+        status = status)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/admin', methods=('GET', 'POST'))
+@auth.login_required
+def admin():
     if request.method == 'POST':
         formId = request.form['formId']
         app.logger.debug("Form ID: " + str(formId))
-
         if formId == 'bananaTime':
             setBananaTime(request.form['bananaTime'])
         elif formId == 'morningAnnouncementTime':
@@ -157,17 +188,13 @@ def home():
         elif formId == 'status':
             setStatus('status' in request.form)
 
-        return redirect(url_for('home'))
+        return redirect(url_for('admin'))
 
-    return render_template('index.html',
+    return render_template('admin.html',
         bananaTime = timeAnnouncements['bananaTime'].time,
         morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
         minsBeforeAnnouncements = minsBeforeAnnouncements,
         status = status)
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
 
 
 # Main

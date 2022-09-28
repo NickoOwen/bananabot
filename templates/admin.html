@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <h1>Time Announcements</h1>
+            <div class="row g-3">
+                <form class="row" method="POST">
+                    <input type="hidden" name="formId" value="bananaTime">
+                    <label for="" class="form-label">Banana Time</label>
+                    <div class="col-auto">
+                        <input class="form-control" type="time" name="bananaTime" value="{{ bananaTime }}">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary">Set</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row g-3">
+                <form class="row" method="POST">
+                    <input type="hidden" name="formId" value="morningAnnouncementTime">
+                    <label for="" class="form-label">Morning Announcement Time</label>
+                    <div class="col-auto">
+                        <input class="form-control" type="time" name="morningAnnouncementTime" value="{{ morningAnnouncementTime }}">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary">Set</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <br>
+    
+    <div class="container">
+        <div class="col-xs-12">
+            <h1>Dynamic Announcements</h1>
+
+            <div class="row">
+                <form class="row" method="POST">
+                    <input type="hidden" name="formId" value="announcement">
+                    <div class="col-auto">
+                        <label for="" class="form-label">Minutes Before</label>
+                        <input class="form-control" type="number" name="minsBefore" min="1" max="1440" step="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">Announcement Message</label>
+                        <textarea class="form-control" name="message" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary">Add</button>
+                    </div>
+                </form>
+            </div>
+
+            <br>
+
+            <div class="row g-3">
+                <h2>Scheduled</h2>
+                <table class="table">
+                    <tr>
+                        <th>Minutes Before</th>
+                        <th>Announcement Message</th>
+                        <th></th>
+                    </tr>
+                    {% for key in minsBeforeAnnouncements %}
+                    <tr>
+                        <form method="POST">
+                            <input type="hidden" name="formId" value="deleteAnnouncement">
+                            <input type="hidden" name="minsBefore" value="{{ minsBeforeAnnouncements[key].minsBefore }}">
+                            <td>{{ minsBeforeAnnouncements[key].minsBefore }}</td>
+                            <td>{{ minsBeforeAnnouncements[key].text }}</td>
+                            <td><button class="btn btn-danger">Delete</button></td>
+                        </form>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- <form class="form-switch form-check" method="POST">
+        <input type="hidden" name="formId" value="status">
+        <label class="form-label">Active</label>
+        <p>{{ status }}</p>
+        {% if status %}
+            <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()" checked>
+        {% else %}
+            <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()">
+        {% endif %}
+    </form> -->
+{% endblock %}
