@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 auth = HTTPBasicAuth()
 
 user = 'user'
-pw = 'secretpassword'
+pw = 'password'
 
 users = {
     user: generate_password_hash(pw)
@@ -44,7 +44,7 @@ class MinsBeforeAnnouncementWorker(Process):
             
             sleepTime = announcementTime - currentTime
             sleepTimeSeconds = sleepTime.seconds
-            # print("DEBUG Announcement for " + str(self.minsBefore) + " minutes before sleeping for seconds: " + str(sleepTimeSeconds))
+            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement for " + str(self.minsBefore) + " minutes before sleeping for seconds: " + str(sleepTimeSeconds))
             time.sleep(sleepTimeSeconds)
 
             print(self.text)
@@ -73,7 +73,7 @@ class TimeAnnouncementWorker(Process):
             
             sleepTime = announcementTime - currentTime
             sleepTimeSeconds = sleepTime.seconds
-            print("DEBUG Announcement for " + str(self.time) + " sleeping for seconds: " + str(sleepTimeSeconds))
+            print("[" + str(datetime.datetime.now()) + "] DEBUG Announcement for " + str(self.time) + " sleeping for seconds: " + str(sleepTimeSeconds))
             time.sleep(sleepTimeSeconds + 1) # Offset by 1 second
 
             print(self.text)
@@ -88,7 +88,7 @@ workers = []
 status = True # TODO Finish implementing status functionality. Determins whether or not the bot will send announcements
 
 timeAnnouncements = {
-    "morningAnnouncement": TimeAnnouncement(datetime.time(10, 0, 0), "1030 announ"),
+    "morningAnnouncement": TimeAnnouncement(datetime.time(10, 0, 0), "Banana Time is at 15:30 today!"),
     "bananaTime": TimeAnnouncement(datetime.time(15, 30, 0), "Banana Time!")
 }
 
@@ -105,8 +105,8 @@ def start():
         worker.start()
         workers.append(worker)
     
-    for announcemenet in minsBeforeAnnouncements.values():
-        worker = MinsBeforeAnnouncementWorker(announcemenet.minsBefore, announcemenet.text)
+    for announcement in minsBeforeAnnouncements.values():
+        worker = MinsBeforeAnnouncementWorker(announcement.minsBefore, announcement.text)
         worker.start()
         workers.append(worker)
 
@@ -119,7 +119,7 @@ def update():
     start()
 
 def formatTime(newTime):
-    t = time.strptime(newTime, "%H:%M")
+    t = time.strptime(newTime, "%H:%M") # TODO Format this properly so seconds are removed
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
 
 def setBananaTime(time):
@@ -133,14 +133,19 @@ def setMorningAnnouncementTime(time):
     timeAnnouncements['morningAnnouncement'].time = formatTime(time)
     update() # TODO have this just restart the morning announcement worker
 
-def addMinsBeforeAnnouncement(minsBefore, message):
+def addMinsBeforeAnnouncement(minsBefore, text):
     mins = int(minsBefore)
 
     if mins in minsBeforeAnnouncements:
         app.logger.warning("Cannot add new announcement as one already exists for " + str(mins) + " minutes before")
         # TODO Somehow alert the user of this
     else:
-        minsBeforeAnnouncements[mins] = MinsBeforeAnnouncement(mins, message)
+        minsBeforeAnnouncements[mins] = MinsBeforeAnnouncement(mins, text)
+
+        worker = MinsBeforeAnnouncementWorker(mins, text)
+        worker.start()
+        workers.append(worker)
+
         app.logger.info("Added new announcement " + str(mins) + " minutes before banana time")
 
 def removeMinsBeforeAnnouncement(minsBefore):
@@ -160,7 +165,6 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-
     return render_template('index.html',
         bananaTime = timeAnnouncements['bananaTime'].time,
         morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
@@ -199,4 +203,5 @@ def admin():
 
 # Main
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='8000', debug=True)
+    start()
+    app.run(host='0.0.0.0', port='8000', debug=True, use_reloader=False)
