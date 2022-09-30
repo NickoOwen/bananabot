@@ -7,6 +7,8 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from announcements import *
+
 # Authentication
 auth = HTTPBasicAuth()
 
@@ -23,69 +25,10 @@ def verify_password(username, password):
         return check_password_hash(users.get(username), password)
     return False
 
-# Classes
-class MinsBeforeAnnouncement:
-    def __init__(self, minsBefore, text):
-        self.minsBefore = minsBefore
-        self.text = text
-
-class MinsBeforeAnnouncementWorker(Process):
-    def __init__(self, minsBefore, text):
-        super(MinsBeforeAnnouncementWorker, self).__init__()
-        self.minsBefore = minsBefore
-        self.text = text
-
-    def run(self):
-        while True:
-            currentTime = datetime.datetime.now()
-            normalisedBananaTime = datetime.datetime.combine(datetime.date.today(), timeAnnouncements['bananaTime'].time)
-            time_delta = normalisedBananaTime - currentTime
-            announcementTime = normalisedBananaTime - datetime.timedelta(minutes = self.minsBefore)
-            
-            sleepTime = announcementTime - currentTime
-            sleepTimeSeconds = sleepTime.seconds
-            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement for " + str(self.minsBefore) + " minutes before sleeping for seconds: " + str(sleepTimeSeconds))
-            time.sleep(sleepTimeSeconds)
-
-            print(self.text)
-            # curl chat app here with self.text
-
-            # Sleep until next day warning
-            time.sleep(1) # This is a hacky way to make it work
-
-class TimeAnnouncement:
-    def __init__(self, time, text):
-        self.time = time
-        self.text = text
-
-class TimeAnnouncementWorker(Process):
-    def __init__(self, time, text):
-        super(TimeAnnouncementWorker, self).__init__()
-        self.time = time
-        self.text = text
-
-    def run(self):
-        while True:
-            currentTime = datetime.datetime.now()
-            normalisedBananaTime = datetime.datetime.combine(datetime.date.today(), timeAnnouncements['bananaTime'].time)
-            
-            announcementTime = datetime.datetime.combine(datetime.date.today(), self.time)
-            
-            sleepTime = announcementTime - currentTime
-            sleepTimeSeconds = sleepTime.seconds
-            print("[" + str(datetime.datetime.now()) + "] DEBUG Announcement for " + str(self.time) + " sleeping for seconds: " + str(sleepTimeSeconds))
-            time.sleep(sleepTimeSeconds + 1) # Offset by 1 second
-
-            print(self.text)
-            # curl chat app here with self.text
-
-            # Sleep until next day warning
-            time.sleep(1) # This is a hacky way to make it work
-
 
 # Banana Time Variables
 workers = []
-status = True # TODO Finish implementing status functionality. Determins whether or not the bot will send announcements
+active = False # TODO Finish implementing status functionality. Determins whether or not the bot will send announcements
 
 timeAnnouncements = {
     "morningAnnouncement": TimeAnnouncement(datetime.time(10, 0, 0), "Banana Time is at 15:30 today!"),
@@ -101,22 +44,25 @@ minsBeforeAnnouncements = {
 # Banana Time Functions
 def start():
     for announcement in timeAnnouncements.values():
-        worker = TimeAnnouncementWorker(announcement.time, announcement.text)
+        worker = TimeAnnouncementWorker(announcement.time, announcement.text, timeAnnouncements['bananaTime'].time)
         worker.start()
         workers.append(worker)
     
     for announcement in minsBeforeAnnouncements.values():
-        worker = MinsBeforeAnnouncementWorker(announcement.minsBefore, announcement.text)
+        worker = MinsBeforeAnnouncementWorker(announcement.minsBefore, announcement.text, timeAnnouncements['bananaTime'].time)
         worker.start()
         workers.append(worker)
 
-def update():
-    # Terminate running workers, reset the workers array, recreate the workers
+def stop():
     for worker in workers:
         worker.terminate()
     
     globals()['workers'] = []
-    start()
+
+def update():
+    if active:
+        stop()
+        start()
 
 def formatTime(newTime):
     t = time.strptime(newTime, "%H:%M") # TODO Format this properly so seconds are removed
@@ -142,7 +88,7 @@ def addMinsBeforeAnnouncement(minsBefore, text):
     else:
         minsBeforeAnnouncements[mins] = MinsBeforeAnnouncement(mins, text)
 
-        worker = MinsBeforeAnnouncementWorker(mins, text)
+        worker = MinsBeforeAnnouncementWorker(mins, text, timeAnnouncements['bananaTime'].time)
         worker.start()
         workers.append(worker)
 
@@ -152,11 +98,14 @@ def removeMinsBeforeAnnouncement(minsBefore):
     minsBeforeAnnouncements.pop(int(minsBefore))
     app.logger.info("Removed announcement for " + str(minsBefore) + " minutes before banana time")
 
-def setStatus(newStatus):
-    status = newStatus
-    if newStatus:
+def toggleStatus():
+    if not globals()['active']:
+        globals()['active'] = True
+        start()
         app.logger.info("BananaBot is now Active")
     else:
+        globals()['active'] = False
+        stop()
         app.logger.info("BananaBot is now Inactive")
 
 
@@ -169,7 +118,7 @@ def home():
         bananaTime = timeAnnouncements['bananaTime'].time,
         morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
         minsBeforeAnnouncements = minsBeforeAnnouncements,
-        status = status)
+        status = active)
 
 @app.route('/about')
 def about():
@@ -190,7 +139,7 @@ def admin():
         elif formId == 'deleteAnnouncement':
             removeMinsBeforeAnnouncement(request.form['minsBefore'])
         elif formId == 'status':
-            setStatus('status' in request.form)
+            toggleStatus()
 
         return redirect(url_for('admin'))
 
@@ -198,10 +147,9 @@ def admin():
         bananaTime = timeAnnouncements['bananaTime'].time,
         morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
         minsBeforeAnnouncements = minsBeforeAnnouncements,
-        status = status)
+        status = active)
 
 
 # Main
 if __name__ == "__main__":
-    start()
     app.run(host='0.0.0.0', port='8000', debug=True, use_reloader=False)

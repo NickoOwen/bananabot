@@ -2,6 +2,19 @@
 
 {% block body %}
     <div class="container">
+        <h1>Status</h1>
+        <form class="form-switch form-check" method="POST">
+            <input type="hidden" name="formId" value="status">
+            <label class="form-label">Active</label>
+            {% if status %}
+                <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()" checked>
+            {% else %}
+                <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()">
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="container">
         <div class="row">
             <h1>Time Announcements</h1>
             <div class="row g-3">
@@ -80,15 +93,4 @@
             </div>
         </div>
     </div>
-
-    <!-- <form class="form-switch form-check" method="POST">
-        <input type="hidden" name="formId" value="status">
-        <label class="form-label">Active</label>
-        <p>{{ status }}</p>
-        {% if status %}
-            <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()" checked>
-        {% else %}
-            <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()">
-        {% endif %}
-    </form> -->
 {% endblock %}
