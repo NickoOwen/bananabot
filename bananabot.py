@@ -28,7 +28,7 @@ def verify_password(username, password):
 
 # Banana Time Variables
 workers = []
-active = False # TODO Finish implementing status functionality. Determins whether or not the bot will send announcements
+active = False
 
 timeAnnouncements = {
     "morningAnnouncement": TimeAnnouncement(datetime.time(10, 0, 0), "Banana Time is at 15:30 today!"),
@@ -64,19 +64,19 @@ def update():
         stop()
         start()
 
-def formatTime(newTime):
-    t = time.strptime(newTime, "%H:%M") # TODO Format this properly so seconds are removed
+def stringToTime(newTime):
+    t = time.strptime(newTime, "%H:%M")
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
 
 def setBananaTime(time):
     app.logger.debug("Requested banana time " + time)
-    timeAnnouncements['bananaTime'].time = formatTime(time)
+    timeAnnouncements['bananaTime'].time = stringToTime(time)
     app.logger.info("New banana time set at " + str(timeAnnouncements['bananaTime'].time))
 
     update()
 
 def setMorningAnnouncementTime(time):
-    timeAnnouncements['morningAnnouncement'].time = formatTime(time)
+    timeAnnouncements['morningAnnouncement'].time = stringToTime(time)
     update() # TODO have this just restart the morning announcement worker
 
 def addMinsBeforeAnnouncement(minsBefore, text):
@@ -88,9 +88,10 @@ def addMinsBeforeAnnouncement(minsBefore, text):
     else:
         minsBeforeAnnouncements[mins] = MinsBeforeAnnouncement(mins, text)
 
-        worker = MinsBeforeAnnouncementWorker(mins, text, timeAnnouncements['bananaTime'].time)
-        worker.start()
-        workers.append(worker)
+        if active:
+            worker = MinsBeforeAnnouncementWorker(mins, text, timeAnnouncements['bananaTime'].time)
+            worker.start()
+            workers.append(worker)
 
         app.logger.info("Added new announcement " + str(mins) + " minutes before banana time")
 
@@ -115,8 +116,8 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('index.html',
-        bananaTime = timeAnnouncements['bananaTime'].time,
-        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
+        bananaTime = timeAnnouncements['bananaTime'].time.strftime("%H:%M"),
+        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time.strftime("%H:%M"),
         minsBeforeAnnouncements = minsBeforeAnnouncements,
         status = active)
 
@@ -144,8 +145,8 @@ def admin():
         return redirect(url_for('admin'))
 
     return render_template('admin.html',
-        bananaTime = timeAnnouncements['bananaTime'].time,
-        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time,
+        bananaTime = timeAnnouncements['bananaTime'].time.strftime("%H:%M"),
+        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time.strftime("%H:%M"),
         minsBeforeAnnouncements = minsBeforeAnnouncements,
         status = active)
 
