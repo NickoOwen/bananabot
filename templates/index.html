@@ -36,10 +36,12 @@
                     <th>Announcement Message</th>
                     <th></th>
                 </tr>
+                {% for key in timeAnnouncements %}
                 <tr>
-                    <td>{{ morningAnnouncementTime }}</td>
-                    <td></td>
+                    <td>{{ timeAnnouncements[key].time.strftime("%H:%M") }}</td>
+                    <td>{{ timeAnnouncements[key].text }}</td>
                 </tr>
+                {% endfor %}
                 {% for key in minsBeforeAnnouncements %}
                 <tr>
                     <td>{{ minsBeforeAnnouncements[key].minsBefore }} Minutes Before</td>
