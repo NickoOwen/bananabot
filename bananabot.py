@@ -1,8 +1,7 @@
 import datetime
 import time
-import requests
-import logging
-from multiprocessing import Process
+import random
+import string
 from flask import Flask, render_template, request, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,8 +11,8 @@ from announcements import *
 # Authentication
 auth = HTTPBasicAuth()
 
-user = 'user'
-pw = 'password'
+user = 'admin'
+pw = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
 users = {
     user: generate_password_hash(pw)
@@ -36,15 +35,16 @@ timeAnnouncements = {
 }
 
 minsBeforeAnnouncements = {
-    60: MinsBeforeAnnouncement(60, "60 mins test"),
-    30: MinsBeforeAnnouncement(30, "30 mins test")
+    60: MinsBeforeAnnouncement(60, "60 Minutes until Banana Time!"),
+    30: MinsBeforeAnnouncement(30, "30 Minutes until Banana Time!"),
+    10: MinsBeforeAnnouncement(10, "10 Minutes until Banana Time!")
 }
 
 
 # Banana Time Functions
 def start():
     for announcement in timeAnnouncements.values():
-        worker = TimeAnnouncementWorker(announcement.time, announcement.text, timeAnnouncements['bananaTime'].time)
+        worker = TimeAnnouncementWorker(announcement.time, announcement.text)
         worker.start()
         workers.append(worker)
     
@@ -116,8 +116,7 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('index.html',
-        bananaTime = timeAnnouncements['bananaTime'].time.strftime("%H:%M"),
-        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time.strftime("%H:%M"),
+        timeAnnouncements = timeAnnouncements,
         minsBeforeAnnouncements = minsBeforeAnnouncements,
         status = active)
 
@@ -153,4 +152,5 @@ def admin():
 
 # Main
 if __name__ == "__main__":
+    print("Admin Password: " + pw)
     app.run(host='0.0.0.0', port='8000', debug=True, use_reloader=False)

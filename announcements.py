@@ -1,6 +1,6 @@
 import datetime
 import time
-import requests
+# import requests
 from multiprocessing import Process
 
 class MinsBeforeAnnouncement:
@@ -38,9 +38,8 @@ class TimeAnnouncement:
         self.text = text
 
 class TimeAnnouncementWorker(Process):
-    def __init__(self, announcementTime, text, time):
+    def __init__(self, time, text):
         super(TimeAnnouncementWorker, self).__init__()
-        self.annoucementTime = announcementTime
         self.text = text
         self.time = time
 
