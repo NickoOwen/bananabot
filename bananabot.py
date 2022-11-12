@@ -53,7 +53,6 @@ def get_banana_time():
 
 def start():
     for key in announcements:
-        print(str(key) + ' - ' + str(announcements[key].id))
         if isinstance(announcements[key], MinsBeforeAnnouncement):
             worker = MinsBeforeAnnouncementWorker(announcements[key].id, announcements[key].mins_before, announcements[key].text, announcements[key].banana_time)
             workers[worker.id] = worker
