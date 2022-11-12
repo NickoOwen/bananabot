@@ -20,7 +20,7 @@
 
 <div class="container">
     <div class="row">
-        <h1>Banana Time will be at {{ bananaTime }} today!</h1>
+        <h1>Banana Time will be at {{ banana_time }} today!</h1>
     </div>
 </div>
 
@@ -33,20 +33,21 @@
             <table class="table">
                 <tr>
                     <th>Time</th>
-                    <th>Announcement Message</th>
+                    <th>Message</th>
                     <th></th>
                 </tr>
-                {% for key in timeAnnouncements %}
-                <tr>
-                    <td>{{ timeAnnouncements[key].time.strftime("%H:%M") }}</td>
-                    <td>{{ timeAnnouncements[key].text }}</td>
-                </tr>
-                {% endfor %}
-                {% for key in minsBeforeAnnouncements %}
-                <tr>
-                    <td>{{ minsBeforeAnnouncements[key].minsBefore }} Minutes Before</td>
-                    <td>{{ minsBeforeAnnouncements[key].text }}</td>
-                </tr>
+                {% for key in announcements %}
+                    {% if announcements[key].time != None %}
+                        <tr>
+                            <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
+                            <td>{{ announcements[key].text }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td>{{ announcements[key].mins_before }} minutes before {{ announcements[key].banana_time.strftime("%H:%M") }}</td>
+                            <td>{{ announcements[key].text }}</td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             </table>
         </div>

@@ -26,80 +26,116 @@ def verify_password(username, password):
 
 
 # Banana Time Variables
-workers = []
+announcements = {}
+workers = {}
 active = False
 
-timeAnnouncements = {
-    "morningAnnouncement": TimeAnnouncement(datetime.time(10, 0, 0), "Banana Time is at 15:30 today!"),
-    "bananaTime": TimeAnnouncement(datetime.time(15, 30, 0), "Banana Time!")
-}
+banana_time_announcement = Announcement(datetime.time(15, 30, 0), "# @HERE Banana Time!", datetime.time(15, 30, 0))
+banana_time_announcement.id = "banana_time"
 
-minsBeforeAnnouncements = {
-    60: MinsBeforeAnnouncement(60, "60 Minutes until Banana Time!"),
-    30: MinsBeforeAnnouncement(30, "30 Minutes until Banana Time!"),
-    10: MinsBeforeAnnouncement(10, "10 Minutes until Banana Time!")
-}
+
+# Initial announcements
+initial_announcements = [
+    banana_time_announcement,
+    Announcement(datetime.time(10, 0, 0), "Banana time is at 15:30 today!", datetime.time(15, 30, 0)),
+    MinsBeforeAnnouncement(60, "Banana time is in 60 minutes!", datetime.time(15, 30, 0)),
+    MinsBeforeAnnouncement(30, "Banana time is in 30 minutes!", datetime.time(15, 30, 0)),
+    MinsBeforeAnnouncement(10, "Banana time is in 10 minutes!", datetime.time(15, 30, 0))
+]
+
+for announcement in initial_announcements:
+    announcements[announcement.id] = announcement
 
 
 # Banana Time Functions
+def get_banana_time():
+    return announcements['banana_time'].time
+
 def start():
-    for announcement in timeAnnouncements.values():
-        worker = TimeAnnouncementWorker(announcement.time, announcement.text)
-        worker.start()
-        workers.append(worker)
-    
-    for announcement in minsBeforeAnnouncements.values():
-        worker = MinsBeforeAnnouncementWorker(announcement.minsBefore, announcement.text, timeAnnouncements['bananaTime'].time)
-        worker.start()
-        workers.append(worker)
+    for key in announcements:
+        print(str(key) + ' - ' + str(announcements[key].id))
+        if isinstance(announcements[key], MinsBeforeAnnouncement):
+            worker = MinsBeforeAnnouncementWorker(announcements[key].id, announcements[key].mins_before, announcements[key].text, announcements[key].banana_time)
+            workers[worker.id] = worker
+            workers[worker.id].start()
+        else:
+            worker = AnnouncementWorker(announcements[key].id, announcements[key].time, announcements[key].text, announcements[key].banana_time)
+            workers[worker.id] = worker
+            workers[worker.id].start()
+
 
 def stop():
-    for worker in workers:
-        worker.terminate()
+    for key in workers:
+        workers[key].terminate()
     
-    globals()['workers'] = []
+    globals()['workers'] = {}
 
 def update():
     if active:
         stop()
         start()
 
-def stringToTime(newTime):
-    t = time.strptime(newTime, "%H:%M")
+def string_to_time(new_time):
+    t = time.strptime(new_time, "%H:%M")
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
 
-def setBananaTime(time):
+def set_banana_time(time):
     app.logger.debug("Requested banana time " + time)
-    timeAnnouncements['bananaTime'].time = stringToTime(time)
-    app.logger.info("New banana time set at " + str(timeAnnouncements['bananaTime'].time))
+    time = string_to_time(time)
+    announcements['banana_time'].time = time
+    announcements['banana_time'].banana_time = time
+    
+    # Update all the announcements
+    for key in announcements:
+        announcements[key].banana_time = get_banana_time()
+            
+    app.logger.info("New banana time set at " + str(get_banana_time()))
 
     update()
 
-def setMorningAnnouncementTime(time):
-    timeAnnouncements['morningAnnouncement'].time = stringToTime(time)
-    update() # TODO have this just restart the morning announcement worker
+def set_banana_time_text(text):
+    announcements['banana_time'].text = text
 
-def addMinsBeforeAnnouncement(minsBefore, text):
-    mins = int(minsBefore)
+    if active:
+        workers['banana_time'].text = text
 
-    if mins in minsBeforeAnnouncements:
-        app.logger.warning("Cannot add new announcement as one already exists for " + str(mins) + " minutes before")
-        # TODO Somehow alert the user of this
-    else:
-        minsBeforeAnnouncements[mins] = MinsBeforeAnnouncement(mins, text)
+def add_announcement(time, text):
+    new_announcement = Announcement(string_to_time(time), text, get_banana_time())
+    announcements[new_announcement.id] = new_announcement
 
-        if active:
-            worker = MinsBeforeAnnouncementWorker(mins, text, timeAnnouncements['bananaTime'].time)
-            worker.start()
-            workers.append(worker)
+    if active:
+        worker = AnnouncementWorker(new_announcement.id, new_announcement.time, new_announcement.text, new_announcement.banana_time)
+        workers[worker.id] = worker
+        workers[worker.id].start()
 
-        app.logger.info("Added new announcement " + str(mins) + " minutes before banana time")
+def add_mins_before_announcement(mins_before, text):
+    mins_before = int(mins_before)
 
-def removeMinsBeforeAnnouncement(minsBefore):
-    minsBeforeAnnouncements.pop(int(minsBefore))
-    app.logger.info("Removed announcement for " + str(minsBefore) + " minutes before banana time")
+    new_announcement = MinsBeforeAnnouncement(mins_before, text, get_banana_time())
+    announcements[new_announcement.id] = new_announcement
 
-def toggleStatus():
+    app.logger.info("Added new announcement " + str(mins_before) + " minutes before banana time")
+
+    if active:
+        worker = MinsBeforeAnnouncementWorker(new_announcement.id, new_announcement.mins_before, new_announcement.text, new_announcement.banana_time)
+        workers[worker.id] = worker
+        workers[worker.id].start()
+
+def remove_announcement(id):
+    if id == 'banana_time':
+        app.logger.warn("Attempted to remove banana_time announcement. This action is not permitted")
+        return
+
+    id = int(id)
+    announcements.pop(id)
+
+    if active:
+        workers[id].terminate()
+        workers.pop(id)
+
+    app.logger.info("Removed announcement with ID: " + str(id))
+
+def toggle_status():
     if not globals()['active']:
         globals()['active'] = True
         start()
@@ -116,8 +152,8 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('index.html',
-        timeAnnouncements = timeAnnouncements,
-        minsBeforeAnnouncements = minsBeforeAnnouncements,
+        banana_time = get_banana_time().strftime("%H:%M"),
+        announcements = announcements,
         status = active)
 
 @app.route('/about')
@@ -128,25 +164,26 @@ def about():
 @auth.login_required
 def admin():
     if request.method == 'POST':
-        formId = request.form['formId']
-        app.logger.debug("Form ID: " + str(formId))
-        if formId == 'bananaTime':
-            setBananaTime(request.form['bananaTime'])
-        elif formId == 'morningAnnouncementTime':
-            setMorningAnnouncementTime(request.form['morningAnnouncementTime'])
-        elif formId == 'announcement':
-            addMinsBeforeAnnouncement(request.form['minsBefore'], request.form['message'])
-        elif formId == 'deleteAnnouncement':
-            removeMinsBeforeAnnouncement(request.form['minsBefore'])
-        elif formId == 'status':
-            toggleStatus()
+        form_id = request.form['form_id']
+        app.logger.debug("Form ID: " + str(form_id))
+
+        if form_id == 'status':
+            toggle_status()
+        elif form_id == 'set_banana_time':
+            set_banana_time(request.form['banana_time'])
+        elif form_id == 'set_banana_time_text':
+            set_banana_time_text(request.form['text'])
+        elif form_id == 'remove_announcement':
+            remove_announcement(request.form['announcement_id'])
+        elif form_id == 'add_announcement':
+            add_announcement(request.form['time'], request.form['text'])
+        elif form_id == 'add_mins_before_announcement':
+            add_mins_before_announcement(request.form['mins_before'], request.form['text'])
 
         return redirect(url_for('admin'))
 
     return render_template('admin.html',
-        bananaTime = timeAnnouncements['bananaTime'].time.strftime("%H:%M"),
-        morningAnnouncementTime = timeAnnouncements['morningAnnouncement'].time.strftime("%H:%M"),
-        minsBeforeAnnouncements = minsBeforeAnnouncements,
+        announcements = announcements,
         status = active)
 
 
