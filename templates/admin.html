@@ -24,7 +24,7 @@
                     <input type="hidden" name="form_id" value="set_banana_time">
                     <h3 for="" class="form-label">Time</h3>
                     <div class="col-auto">
-                        <input class="form-control" type="time" name="banana_time" value="{{ announcements['banana_time'].time }}">
+                        <input class="form-control" type="time" name="banana_time" value="{{ announcements['banana_time'].time.strftime('%H:%M') }}">
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-primary">Set</button>
@@ -71,9 +71,9 @@
                                 <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
                                 <td>{{ announcements[key].text }}</td>
                                 {% if announcements[key].id != 'banana_time' %}
-                                    <td><button class="btn btn-danger">Remove</button></td>
+                                    <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td>
                                 {% else %}
-                                    <td title="Can't remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
+                                    <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
                                 {% endif %}
                             </form>
                         </tr>

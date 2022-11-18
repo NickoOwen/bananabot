@@ -29,18 +29,18 @@ def verify_password(username, password):
 announcements = {}
 workers = {}
 active = False
+Announcement.banana_time = datetime.time(15, 30, 0)
 
-banana_time_announcement = Announcement(datetime.time(15, 30, 0), "# @HERE Banana Time!", datetime.time(15, 30, 0))
+banana_time_announcement = Announcement(Announcement.banana_time, "# @HERE Banana Time!")
 banana_time_announcement.id = "banana_time"
-
 
 # Initial announcements
 initial_announcements = [
     banana_time_announcement,
-    Announcement(datetime.time(10, 0, 0), "Banana time is at 15:30 today!", datetime.time(15, 30, 0)),
-    MinsBeforeAnnouncement(60, "Banana time is in 60 minutes!", datetime.time(15, 30, 0)),
-    MinsBeforeAnnouncement(30, "Banana time is in 30 minutes!", datetime.time(15, 30, 0)),
-    MinsBeforeAnnouncement(10, "Banana time is in 10 minutes!", datetime.time(15, 30, 0))
+    Announcement(datetime.time(10, 0, 0), "Banana time is at 15:30 today!"),
+    MinsBeforeAnnouncement(60, "Banana time is in 60 minutes!"),
+    MinsBeforeAnnouncement(30, "Banana time is in 30 minutes!"),
+    MinsBeforeAnnouncement(10, "Banana time is in 10 minutes!")
 ]
 
 for announcement in initial_announcements:
@@ -48,17 +48,14 @@ for announcement in initial_announcements:
 
 
 # Banana Time Functions
-def get_banana_time():
-    return announcements['banana_time'].time
-
 def start():
     for key in announcements:
         if isinstance(announcements[key], MinsBeforeAnnouncement):
-            worker = MinsBeforeAnnouncementWorker(announcements[key].id, announcements[key].mins_before, announcements[key].text, announcements[key].banana_time)
+            worker = MinsBeforeAnnouncementWorker(announcements[key].id, announcements[key].mins_before, announcements[key].text, Announcement.banana_time)
             workers[worker.id] = worker
             workers[worker.id].start()
         else:
-            worker = AnnouncementWorker(announcements[key].id, announcements[key].time, announcements[key].text, announcements[key].banana_time)
+            worker = AnnouncementWorker(announcements[key].id, announcements[key].time, announcements[key].text, Announcement.banana_time)
             workers[worker.id] = worker
             workers[worker.id].start()
 
@@ -80,15 +77,9 @@ def string_to_time(new_time):
 
 def set_banana_time(time):
     app.logger.debug("Requested banana time " + time)
-    time = string_to_time(time)
-    announcements['banana_time'].time = time
-    announcements['banana_time'].banana_time = time
-    
-    # Update all the announcements
-    for key in announcements:
-        announcements[key].banana_time = get_banana_time()
-            
-    app.logger.info("New banana time set at " + str(get_banana_time()))
+    Announcement.banana_time = string_to_time(time)
+    announcements['banana_time'].time = Announcement.banana_time    
+    app.logger.info("New banana time set at " + str(Announcement.banana_time))
 
     update()
 
@@ -99,24 +90,24 @@ def set_banana_time_text(text):
         workers['banana_time'].text = text
 
 def add_announcement(time, text):
-    new_announcement = Announcement(string_to_time(time), text, get_banana_time())
+    new_announcement = Announcement(string_to_time(time), text)
     announcements[new_announcement.id] = new_announcement
 
     if active:
-        worker = AnnouncementWorker(new_announcement.id, new_announcement.time, new_announcement.text, new_announcement.banana_time)
+        worker = AnnouncementWorker(new_announcement.id, new_announcement.time, new_announcement.text, Announcement.banana_time)
         workers[worker.id] = worker
         workers[worker.id].start()
 
 def add_mins_before_announcement(mins_before, text):
     mins_before = int(mins_before)
 
-    new_announcement = MinsBeforeAnnouncement(mins_before, text, get_banana_time())
+    new_announcement = MinsBeforeAnnouncement(mins_before, text)
     announcements[new_announcement.id] = new_announcement
 
     app.logger.info("Added new announcement " + str(mins_before) + " minutes before banana time")
 
     if active:
-        worker = MinsBeforeAnnouncementWorker(new_announcement.id, new_announcement.mins_before, new_announcement.text, new_announcement.banana_time)
+        worker = MinsBeforeAnnouncementWorker(new_announcement.id, new_announcement.mins_before, new_announcement.text, Announcement.banana_time)
         workers[worker.id] = worker
         workers[worker.id].start()
 
@@ -151,7 +142,7 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('index.html',
-        banana_time = get_banana_time().strftime("%H:%M"),
+        banana_time = Announcement.banana_time.strftime("%H:%M"),
         announcements = announcements,
         status = active)
 
@@ -166,18 +157,21 @@ def admin():
         form_id = request.form['form_id']
         app.logger.debug("Form ID: " + str(form_id))
 
-        if form_id == 'status':
-            toggle_status()
-        elif form_id == 'set_banana_time':
-            set_banana_time(request.form['banana_time'])
-        elif form_id == 'set_banana_time_text':
-            set_banana_time_text(request.form['text'])
-        elif form_id == 'remove_announcement':
-            remove_announcement(request.form['announcement_id'])
-        elif form_id == 'add_announcement':
-            add_announcement(request.form['time'], request.form['text'])
-        elif form_id == 'add_mins_before_announcement':
-            add_mins_before_announcement(request.form['mins_before'], request.form['text'])
+        match form_id:
+            case 'status':
+                toggle_status()
+            case 'set_banana_time':
+                set_banana_time(request.form['banana_time'])
+            case 'set_banana_time_text':
+                set_banana_time_text(request.form['text'])
+            case 'remove_announcement':
+                remove_announcement(request.form['announcement_id'])
+            case 'add_announcement':
+                add_announcement(request.form['time'], request.form['text'])
+            case 'add_mins_before_announcement':
+                add_mins_before_announcement(request.form['mins_before'], request.form['text'])
+            case _:
+                app.logger.error("form_id: " + form_id + " not recognised")
 
         return redirect(url_for('admin'))
 
