@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
 {% block body %}
+    <!-- Options -->
     <div class="container">
-        <h1>Status</h1>
+        <h1>Options</h1>
         <form class="form-switch form-check" method="POST">
-            <input type="hidden" name="formId" value="status">
+            <input type="hidden" name="form_id" value="status">
             <label class="form-label">Active</label>
             {% if status %}
                 <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()" checked>
@@ -14,28 +15,16 @@
         </form>
     </div>
 
+    <!-- Banana Time -->
     <div class="container">
+        <h1>Banana Time</h1>
         <div class="row">
-            <h1>Time Announcements</h1>
             <div class="row g-3">
                 <form class="row" method="POST">
-                    <input type="hidden" name="formId" value="bananaTime">
-                    <label for="" class="form-label">Banana Time</label>
+                    <input type="hidden" name="form_id" value="set_banana_time">
+                    <h3 for="" class="form-label">Time</h3>
                     <div class="col-auto">
-                        <input class="form-control" type="time" name="bananaTime" value="{{ bananaTime }}">
-                    </div>
-                    <div class="col-auto">
-                        <button class="btn btn-primary">Set</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="row g-3">
-                <form class="row" method="POST">
-                    <input type="hidden" name="formId" value="morningAnnouncementTime">
-                    <label for="" class="form-label">Morning Announcement Time</label>
-                    <div class="col-auto">
-                        <input class="form-control" type="time" name="morningAnnouncementTime" value="{{ morningAnnouncementTime }}">
+                        <input class="form-control" type="time" name="banana_time" value="{{ announcements['banana_time'].time.strftime('%H:%M') }}">
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-primary">Set</button>
@@ -43,24 +32,82 @@
                 </form>
             </div>
         </div>
+        <br>
+        <div class="row">
+            <form class="row" method="POST">
+                <input type="hidden" name="form_id" value="set_banana_time_text">
+                <h3 for="" class="form-label">Message</h3>
+                <div class="col">
+                    <input type="text" class="form-control" name="text" value="{{ announcements['banana_time'].text }}" required></input>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary">Set</button>
+                </div>
+            </form>
+        </div>
     </div>
     
     <br>
     
+    <!-- Announcements -->
     <div class="container">
-        <div class="col-xs-12">
-            <h1>Dynamic Announcements</h1>
+        <h1>Announcements</h1>
 
+        <!-- Scheduled -->
+        <div class="row">
+            <h3>Scheduled</h3>
+            <table class="table">
+                <tr>
+                    <th>Time</th>
+                    <th>Message</th>
+                    <th></th>
+                </tr>
+                {% for key in announcements %}
+                    {% if announcements[key].time != None %}
+                        <tr>
+                            <form method="POST">
+                                <input type="hidden" name="form_id" value="remove_announcement">
+                                <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
+                                <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
+                                <td>{{ announcements[key].text }}</td>
+                                {% if announcements[key].id != 'banana_time' %}
+                                    <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td>
+                                {% else %}
+                                    <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
+                                {% endif %}
+                            </form>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <form method="POST">
+                                <input type="hidden" name="form_id" value="remove_announcement">
+                                <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
+                                <td>{{ announcements[key].mins_before }} minutes before {{ announcements[key].banana_time.strftime("%H:%M") }}</td>
+                                <td>{{ announcements[key].text }}</td>
+                                <td><button class="btn btn-danger">Remove</button></td>
+                            </form>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+
+        <br>
+
+        <!-- Add Announcements -->
+        <div class="row">
+            <h3>Add Announcements</h3>
             <div class="row">
-                <form class="row" method="POST">
-                    <input type="hidden" name="formId" value="announcement">
-                    <div class="col-auto">
-                        <label for="" class="form-label">Minutes Before</label>
-                        <input class="form-control" type="number" name="minsBefore" min="1" max="1440" step="1" required>
+                <h4>Time Announcement</h4>
+                <form method="POST" class="row">
+                    <input type="hidden" name="form_id" value="add_announcement">
+                    <div class="col-sm-auto ">
+                        <label for="" class="form-label">Time</label>
+                        <input class="form-control" type="time" name="time">
                     </div>
                     <div class="mb-3">
                         <label for="" class="form-label">Announcement Message</label>
-                        <textarea class="form-control" name="message" required></textarea>
+                        <input class="form-control" type="text" name="text" required></textarea>
                     </div>
                     <div class="mb-3">
                         <button class="btn btn-primary">Add</button>
@@ -68,28 +115,22 @@
                 </form>
             </div>
 
-            <br>
-
-            <div class="row g-3">
-                <h2>Scheduled</h2>
-                <table class="table">
-                    <tr>
-                        <th>Minutes Before</th>
-                        <th>Announcement Message</th>
-                        <th></th>
-                    </tr>
-                    {% for key in minsBeforeAnnouncements %}
-                    <tr>
-                        <form method="POST">
-                            <input type="hidden" name="formId" value="deleteAnnouncement">
-                            <input type="hidden" name="minsBefore" value="{{ minsBeforeAnnouncements[key].minsBefore }}">
-                            <td>{{ minsBeforeAnnouncements[key].minsBefore }}</td>
-                            <td>{{ minsBeforeAnnouncements[key].text }}</td>
-                            <td><button class="btn btn-danger">Delete</button></td>
-                        </form>
-                    </tr>
-                    {% endfor %}
-                </table>
+            <div class="row">
+                <h4>Minutes Before Announcement</h4>
+                <form method="POST" class="row">
+                    <input type="hidden" name="form_id" value="add_mins_before_announcement">
+                    <div class="col-sm-auto ">
+                        <label for="" class="form-label">Minutes Before</label>
+                        <input class="form-control" type="number" name="mins_before" min="1" max="1440" step="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">Announcement Message</label>
+                        <input class="form-control" type="text" name="text" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary">Add</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

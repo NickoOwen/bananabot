@@ -1,61 +1,68 @@
 import datetime
+import json
 import time
-# import requests
+import requests
+import itertools
 from multiprocessing import Process
 
-class MinsBeforeAnnouncement:
-    def __init__(self, minsBefore, text):
-        self.minsBefore = minsBefore
+class Announcement:
+    id_iter = itertools.count()
+    banana_time = datetime.time(10, 30, 0)
+    def __init__(self, time, text):
+        self.id = next(self.id_iter)
+        self.time = time
         self.text = text
 
-class MinsBeforeAnnouncementWorker(Process):
-    def __init__(self, minsBefore, text, time):
-        super(MinsBeforeAnnouncementWorker, self).__init__()
-        self.minsBefore = minsBefore
-        self.text = text
+class AnnouncementWorker(Process):
+    def __init__(self, id, time, text, banana_time):
+        super(AnnouncementWorker, self).__init__()
+        self.id = id
         self.time = time
+        self.text = text
+        self.banana_time = banana_time
+
+    def calculate_alert_time(self):
+        return datetime.datetime.combine(datetime.date.today(), self.time)
 
     def run(self):
         while True:
-            currentTime = datetime.datetime.now()
-            normalisedTime = datetime.datetime.combine(datetime.date.today(), self.time)
-            alertTime = normalisedTime - datetime.timedelta(minutes = self.minsBefore)
+            current_time = datetime.datetime.now()
             
-            sleepTime = alertTime - currentTime
-            sleepTimeSeconds = sleepTime.seconds
-            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement for " + str(self.minsBefore) + " minutes before is sleeping for " + str(sleepTimeSeconds) + " seconds")
-            time.sleep(sleepTimeSeconds)
+            alert_time = self.calculate_alert_time()
+            
+            sleep_time = alert_time - current_time
+            sleep_time_seconds = sleep_time.seconds
+            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement with ID " + str(self.id) + " is sleeping for " + str(sleep_time_seconds) + " seconds")
+            time.sleep(sleep_time_seconds + 1) # Offset by 1 second
 
-            print(self.text)
-            # curl chat app here with self.text
+            # POST Request to send message
+            # url = 'https://your.endpoint.here'
+
+            # headers = {
+            #     # Already added when you pass json= but not when you pass data=
+            #     # 'Content-Type': 'application/json'
+            # }
+
+            # json_data = {
+            #     'text': self.text
+            # }
+
+            # requests.post(url, headers=headers, json=json_data, verify=False)
+            print("[" + str(datetime.datetime.now()) + "] INFO - Request sent with message: " + self.text)
 
             # Sleep until next day warning
             time.sleep(1) # This is a hacky way to make it work
 
-class TimeAnnouncement:
-    def __init__(self, time, text):
-        self.time = time
-        self.text = text
+class MinsBeforeAnnouncement(Announcement):
+    def __init__(self, mins_before, text):
+        super().__init__(None, text)
+        self.mins_before = mins_before
 
-class TimeAnnouncementWorker(Process):
-    def __init__(self, time, text):
-        super(TimeAnnouncementWorker, self).__init__()
-        self.text = text
-        self.time = time
+class MinsBeforeAnnouncementWorker(AnnouncementWorker):
+    def __init__(self, id, mins_before, text, banana_time):
+        super().__init__(id, None, text, banana_time)
+        self.mins_before = mins_before
 
-    def run(self):
-        while True:
-            currentTime = datetime.datetime.now()
-            
-            alertTime = datetime.datetime.combine(datetime.date.today(), self.time)
-            
-            sleepTime = alertTime - currentTime
-            sleepTimeSeconds = sleepTime.seconds
-            print("[" + str(datetime.datetime.now()) + "] DEBUG Announcement for " + str(self.time) + " sleeping for seconds: " + str(sleepTimeSeconds) + " seconds")
-            time.sleep(sleepTimeSeconds + 1) # Offset by 1 second
-
-            print(self.text)
-            # curl chat app here with self.text
-
-            # Sleep until next day warning
-            time.sleep(1) # This is a hacky way to make it work
+    def calculate_alert_time(self):
+        normalised_time = datetime.datetime.combine(datetime.date.today(), self.banana_time)
+        return normalised_time - datetime.timedelta(minutes = self.mins_before) 
