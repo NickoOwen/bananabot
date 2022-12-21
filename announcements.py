@@ -7,13 +7,24 @@ from multiprocessing import Process
 
 class Announcement:
     id_iter = itertools.count()
-    banana_time = datetime.time(10, 30, 0)
+    banana_time = datetime.time(15, 30, 0)
     def __init__(self, time, text):
         self.id = next(self.id_iter)
         self.time = time
         self.text = text
 
 class AnnouncementWorker(Process):
+    # Keeps track of which days are selected to send alerts on
+    selected_days = {
+        "monday": True,
+        "tuesday": True,
+        "wednesday": True,
+        "thursday": True,
+        "friday": True,
+        "saturday": False,
+        "sunday": False
+    }
+
     def __init__(self, id, time, text, banana_time):
         super(AnnouncementWorker, self).__init__()
         self.id = id

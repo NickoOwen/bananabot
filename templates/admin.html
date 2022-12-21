@@ -4,6 +4,7 @@
     <!-- Options -->
     <div class="container">
         <h1>Options</h1>
+        <h3>Status</h3>
         <form class="form-switch form-check" method="POST">
             <input type="hidden" name="form_id" value="status">
             <label class="form-label">Active</label>
@@ -13,6 +14,66 @@
                 <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()">
             {% endif %}
         </form>
+
+        <h3>Day Selector</h3>
+        <div class="row">
+            <form method="POST">
+                <input type="hidden" name="form_id" value="day_selector">
+                
+                <div class="btn-group">
+                    {% if selected_days["monday"] %}
+                        <input type="checkbox" name="monday" class="btn-check" id="monday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="monday" class="btn-check" id="monday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="monday_checkbox">Monday</label>
+
+                    {% if selected_days["tuesday"] %}
+                        <input type="checkbox" name="tuesday" class="btn-check" id="tuesday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="tuesday" class="btn-check" id="tuesday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="tuesday_checkbox">Tuesday</label>
+
+                    {% if selected_days["wednesday"] %}
+                        <input type="checkbox" name="wednesday" class="btn-check" id="wednesday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="wednesday" class="btn-check" id="wednesday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="wednesday_checkbox">Wednesday</label>
+
+                    {% if selected_days["thursday"] %}
+                        <input type="checkbox" name="thursday" class="btn-check" id="thursday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="thursday" class="btn-check" id="thursday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="thursday_checkbox">Thursday</label>
+
+                    {% if selected_days["friday"] %}
+                        <input type="checkbox" name="friday" class="btn-check" id="friday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="friday" class="btn-check" id="friday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="friday_checkbox">Friday</label>
+
+                    {% if selected_days["saturday"] %}
+                        <input type="checkbox" name="saturday" class="btn-check" id="saturday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="saturday" class="btn-check" id="saturday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="saturday_checkbox">Saturday</label>
+
+                    {% if selected_days["sunday"] %}
+                        <input type="checkbox" name="sunday" class="btn-check" id="sunday_checkbox" onchange="this.form.submit()" checked>
+                    {% else %}
+                        <input type="checkbox" name="sunday" class="btn-check" id="sunday_checkbox" onchange="this.form.submit()">
+                    {% endif %}
+                    <label class="btn btn-outline-primary" for="sunday_checkbox">Sunday</label>
+                </div>
+            </form>
+        </div>
+
+        <br>
     </div>
 
     <!-- Banana Time -->

@@ -31,6 +31,7 @@ workers = {}
 active = False
 Announcement.banana_time = datetime.time(15, 30, 0)
 
+# Create the banana time announcement
 banana_time_announcement = Announcement(Announcement.banana_time, "# @HERE Banana Time!")
 banana_time_announcement.id = "banana_time"
 
@@ -170,6 +171,16 @@ def admin():
                 add_announcement(request.form['time'], request.form['text'])
             case 'add_mins_before_announcement':
                 add_mins_before_announcement(request.form['mins_before'], request.form['text'])
+            case 'day_selector':
+                app.logger.info("Updating selected days")
+                app.logger.debug("Selected days form: " + str(request.form))
+                AnnouncementWorker.selected_days['monday'] = request.form.get('monday', False) == 'on'
+                AnnouncementWorker.selected_days['tuesday'] = request.form.get('tuesday', False) == 'on'
+                AnnouncementWorker.selected_days['wednesday'] = request.form.get('wednesday', False) == 'on'
+                AnnouncementWorker.selected_days['thursday'] = request.form.get('thursday', False) == 'on'
+                AnnouncementWorker.selected_days['friday'] = request.form.get('friday', False) == 'on'
+                AnnouncementWorker.selected_days['saturday'] = request.form.get('saturday', False) == 'on'
+                AnnouncementWorker.selected_days['sunday'] = request.form.get('sunday', False) == 'on'
             case _:
                 app.logger.error("form_id: " + form_id + " not recognised")
 
@@ -177,7 +188,8 @@ def admin():
 
     return render_template('admin.html',
         announcements = announcements,
-        status = active)
+        status = active,
+        selected_days = AnnouncementWorker.selected_days)
 
 
 # Main
