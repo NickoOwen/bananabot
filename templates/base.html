@@ -34,5 +34,32 @@
         </div>
     </nav>
     {% block body %} {% endblock %}
+
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/jquery/jquery-3.6.3.js') }}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.status-switch').change(function() {
+                var formData = $('#status-form').serialize();
+                console.log('status changed: ', formData);
+                $.ajax({
+                    type:'POST',
+                    url:'/admin',
+                    data: formData,
+                    dataType: 'json',
+                });
+            });
+
+            $('.day-selector-checkbox').change(function() {
+                var formData = $('#day-selector-form').serialize();
+                $.ajax({
+                    type:'POST',
+                    url:'/admin',
+                    data: formData,
+                    dataType: 'json',
+                });
+            });
+        });
+    </script>
 </body>
 </html>

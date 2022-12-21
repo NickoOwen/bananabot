@@ -174,13 +174,10 @@ def admin():
             case 'day_selector':
                 app.logger.info("Updating selected days")
                 app.logger.debug("Selected days form: " + str(request.form))
-                AnnouncementWorker.selected_days['monday'] = request.form.get('monday', False) == 'on'
-                AnnouncementWorker.selected_days['tuesday'] = request.form.get('tuesday', False) == 'on'
-                AnnouncementWorker.selected_days['wednesday'] = request.form.get('wednesday', False) == 'on'
-                AnnouncementWorker.selected_days['thursday'] = request.form.get('thursday', False) == 'on'
-                AnnouncementWorker.selected_days['friday'] = request.form.get('friday', False) == 'on'
-                AnnouncementWorker.selected_days['saturday'] = request.form.get('saturday', False) == 'on'
-                AnnouncementWorker.selected_days['sunday'] = request.form.get('sunday', False) == 'on'
+
+                # Update selected_days values with form data
+                AnnouncementWorker.selected_days = dict((day, request.form.get(day, False) == 'on') for day in AnnouncementWorker.selected_days)
+
             case _:
                 app.logger.error("form_id: " + form_id + " not recognised")
 
