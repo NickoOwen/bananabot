@@ -7,12 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### N/A currently
+#### Added
+- AJAX requests to make the UI experience smoother, more robust, and eliminate the need to refresh the page when a change is made
+- The ability to send a message instantly from the admin UI
+
+## [3.2.0]
+
+#### Added
+- The ability to configure which days of the week announcements are sent
+- Updated the readme to provide a bit more context around BananaBot's intended purpose
 
 ## [3.1.0] - 2022-11-26
 
 #### Added
--  Re-worked the backend `Announcement` classes and changed how they were stored to reduce complexity
+- Re-worked the backend `Announcement` classes and changed how they were stored to reduce complexity
 - Switched to use snake_case to conform with Python standards
 - Modified the admin page to work with the new backend changes and made it more user-friendly
 - Added a Dockerfile and changelog file
