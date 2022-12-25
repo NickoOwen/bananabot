@@ -8,29 +8,20 @@ from multiprocessing import Process
 class Announcement:
     id_iter = itertools.count()
     banana_time = datetime.time(15, 30, 0)
+
     def __init__(self, time, text):
         self.id = next(self.id_iter)
         self.time = time
         self.text = text
 
 class AnnouncementWorker(Process):
-    # Keeps track of which days are selected to send alerts on
-    selected_days = {
-        "monday": True,
-        "tuesday": True,
-        "wednesday": True,
-        "thursday": True,
-        "friday": True,
-        "saturday": False,
-        "sunday": False
-    }
-
-    def __init__(self, id, time, text, banana_time):
+    def __init__(self, id, time, text, banana_time, selected_days):
         super(AnnouncementWorker, self).__init__()
         self.id = id
         self.time = time
         self.text = text
         self.banana_time = banana_time
+        self.selected_days = selected_days
 
     def calculate_alert_time(self):
         return datetime.datetime.combine(datetime.date.today(), self.time)
@@ -47,19 +38,22 @@ class AnnouncementWorker(Process):
             time.sleep(sleep_time_seconds + 1) # Offset by 1 second
 
             # POST Request to send message
-            # url = 'https://your.endpoint.here'
+            current_day = datetime.datetime.now().strftime('%A').lower()
+            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement (id: " + str(self.id) + ") post on " + current_day + ": " + str(self.selected_days[current_day]))
+            if self.selected_days[current_day]:
+                url = 'https://your.endpoint.here'
 
-            # headers = {
-            #     # Already added when you pass json= but not when you pass data=
-            #     # 'Content-Type': 'application/json'
-            # }
+                headers = {
+                    # Already added when you pass json= but not when you pass data=
+                    # 'Content-Type': 'application/json'
+                }
 
-            # json_data = {
-            #     'text': self.text
-            # }
+                json_data = {
+                    'text': self.text
+                }
 
-            # requests.post(url, headers=headers, json=json_data, verify=False)
-            print("[" + str(datetime.datetime.now()) + "] INFO - Request sent with message: " + self.text)
+                # requests.post(url, headers=headers, json=json_data, verify=False)
+                print("[" + str(datetime.datetime.now()) + "] INFO - Request sent with message: " + self.text)
 
             # Sleep until next day warning
             time.sleep(1) # This is a hacky way to make it work
@@ -70,8 +64,8 @@ class MinsBeforeAnnouncement(Announcement):
         self.mins_before = mins_before
 
 class MinsBeforeAnnouncementWorker(AnnouncementWorker):
-    def __init__(self, id, mins_before, text, banana_time):
-        super().__init__(id, None, text, banana_time)
+    def __init__(self, id, mins_before, text, banana_time, selected_days):
+        super().__init__(id, None, text, banana_time, selected_days)
         self.mins_before = mins_before
 
     def calculate_alert_time(self):
