@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class="container">
-    <h1>Welcome to Banana Bot!</h1>
-    <p>What started as one man's daily banana has taken the world by storm! As other colleagues began to join in the fun something magical began to stir behind the scenes. And thus, BananaBot (BB for short) was born.</p>
 
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vitae nisl nec risus tristique aliquam. Cras nec consequat dolor, sed volutpat odio. Nunc varius lectus quis enim convallis ultrices. Sed lorem orci, gravida id porta quis, condimentum sit amet libero. Duis sagittis porta finibus. Sed facilisis enim quis porttitor laoreet. Suspendisse aliquet finibus urna nec auctor. Sed tincidunt malesuada faucibus. Pellentesque eu mi in quam faucibus vulputate. Praesent vel odio maximus, congue metus mattis, dictum dolor.</p>
+<div class="vh-100 bg-black w-100">
+    <div class="container-landing landing-text-container hero-image">
+        <div class="">
+            <h1 class="text-uppercase text-white landing-header">The Worldwide Phenomenon Taking the World By Storm!
+            </h1>
+            <p class="text-white landing-text"> As other colleagues began to join in the fun something magical began to stir behind the scenes. And thus,
+                BananaBot (BB for short) was born.</p>
+        </div>
+    </div>
 
-    <p>Vivamus lacinia interdum neque, id elementum tortor rhoncus quis. Quisque in tempus mi, ut pulvinar turpis. Nam consectetur metus quis velit pulvinar euismod. Pellentesque cursus iaculis congue. Sed et nisi in sem convallis accumsan. Morbi id faucibus nisi, ut hendrerit eros. Maecenas facilisis finibus ipsum, quis molestie urna venenatis vehicula. Duis mattis, lorem vel dapibus fringilla, urna felis vestibulum odio, ut finibus diam metus eu nunc. Nulla lobortis orci lorem, vel facilisis nunc ultricies sit amet. Donec est odio, mollis eu dui vel, ullamcorper pulvinar metus. Donec eu faucibus dui. In id volutpat lacus, ac suscipit enim. Nulla placerat pretium eros quis auctor. Aenean at tristique neque, a accumsan tellus. Etiam at metus sed ex fringilla commodo. Vestibulum imperdiet lorem non nulla imperdiet, a molestie dui ultrices.</p>
-
-    <p>Nulla et faucibus neque. Nulla faucibus odio eget felis maximus blandit ac et dolor. Aenean imperdiet, eros euismod fermentum tempus, urna lorem luctus sapien, sed auctor velit leo ac libero. Duis a sapien id lectus eleifend aliquet. Aenean id urna ex. Aenean in elit leo. Fusce nec massa sed mi sodales auctor a sit amet justo.</p>
-
-    <p>Etiam tempus ut arcu vel bibendum. Vestibulum malesuada consequat nunc, at pellentesque velit placerat vitae. Fusce ornare, lacus quis facilisis porta, turpis diam venenatis nibh, consectetur rutrum velit justo ac velit. Vivamus libero nibh, ultrices in lacus ac, finibus finibus mi. Duis lorem diam, interdum vitae risus id, pulvinar pulvinar tortor. Aenean semper est vitae ante malesuada, ac iaculis magna dignissim. Pellentesque non nibh pellentesque, euismod nisi id, faucibus lorem. Nullam ultricies finibus tellus at vestibulum.</p>
-    
-    <p>Cras sed massa sem. Duis congue volutpat elit. Proin molestie, lorem sed volutpat eleifend, massa libero dignissim est, at gravida justo lacus in tortor. Aenean et viverra nisl. Nulla a tincidunt ex. Ut et odio lacus. Nam vitae odio nulla. Proin lobortis risus vel malesuada euismod. Suspendisse faucibus diam quis nisi ultrices luctus. Cras posuere venenatis odio vel fringilla. Donec semper sagittis porttitor. Donec magna est, dictum a tellus quis, congue iaculis justo. Donec eget massa lobortis, elementum mi vel, feugiat mi. Mauris blandit nec leo sit amet lobortis</p>
+    <div class="container-fluid">
+        <h2>Banana time in</h2>
+    </div>
 </div>
 
 <hr>
@@ -37,17 +38,18 @@
                     <th></th>
                 </tr>
                 {% for key in announcements %}
-                    {% if announcements[key].time != None %}
-                        <tr>
-                            <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
-                            <td>{{ announcements[key].text }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td>{{ announcements[key].mins_before }} minutes before {{ announcements[key].banana_time.strftime("%H:%M") }}</td>
-                            <td>{{ announcements[key].text }}</td>
-                        </tr>
-                    {% endif %}
+                {% if announcements[key].time != None %}
+                <tr>
+                    <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
+                    <td>{{ announcements[key].text }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>{{ announcements[key].mins_before }} minutes before {{
+                        announcements[key].banana_time.strftime("%H:%M") }}</td>
+                    <td>{{ announcements[key].text }}</td>
+                </tr>
+                {% endif %}
                 {% endfor %}
             </table>
         </div>

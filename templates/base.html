@@ -1,22 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- Required meta tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/bootstrap/css/bootstrap.min.css') }}">
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"> -->
+    <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='styles/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
 
     <title>BananaBot</title>
 </head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap');
+
+    body {
+        font-family: 'Montserrat', sans-serif !important;
+    }
+
+    .landing-header {
+        font-weight: 900;
+        line-height: 64px;
+        font-size: 60px;
+    }
+
+    .hero-image {
+        background-image: url("static/banana-background.jpg");
+        /* The image used */
+        background-position: center;
+        /* Center the image */
+        background-repeat: no-repeat;
+        /* Do not repeat the image */
+        background-size: cover;
+        /* Resize the background image to cover the entire container */
+    }
+
+    .landing-text{
+        font-size: 20px;
+        font-weight: 500;
+        padding-right: 10%;
+    }
+
+    .container-landing{
+        padding: 80px;
+        display: flex;
+        align-items: center;
+    }
+
+    .landing-text-container{
+        padding-right: 60%;
+        height: 700px;
+    }
+</style>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
+        <div class="container-fluid w-100">
             <a class="navbar-brand" href="/">BananaBot</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
@@ -27,7 +75,7 @@
                         <a class="nav-link" href="{{ url_for('about') }}">About</a>
                     </li>
                     <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
+                        <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
                     </li>
                 </ul>
             </div>
@@ -35,4 +83,5 @@
     </nav>
     {% block body %} {% endblock %}
 </body>
+
 </html>
