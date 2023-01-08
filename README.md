@@ -24,7 +24,7 @@ BananaBot is intended to be deployed in a container, but can also be ran locally
 
 To run the BananaBot container built above, run the following command
 ```
-docker run --name bananabot -p 8000:8000 bananabot
+docker run --name bananabot -p 8000:8000 -d bananabot
 ```
 
 ### Running with Python3

@@ -5,23 +5,35 @@ import requests
 import itertools
 from multiprocessing import Process
 
+# Announcement data class for storing the information of each announcement
 class Announcement:
     id_iter = itertools.count()
     banana_time = datetime.time(15, 30, 0)
+    # Keeps track of what days the announcements should be sent
+    selected_days = {
+        "monday": True,
+        "tuesday": True,
+        "wednesday": True,
+        "thursday": True,
+        "friday": True,
+        "saturday": False,
+        "sunday": False
+    }
 
     def __init__(self, time, text):
         self.id = next(self.id_iter)
         self.time = time
         self.text = text
 
+# AnnouncementWorker class that makes use of multiprocessing to allow it to run standalone and sleep until the right time
 class AnnouncementWorker(Process):
-    def __init__(self, id, time, text, banana_time, selected_days):
+    def __init__(self, announcement: Announcement):
         super(AnnouncementWorker, self).__init__()
-        self.id = id
-        self.time = time
-        self.text = text
-        self.banana_time = banana_time
-        self.selected_days = selected_days
+        self.id = announcement.id
+        self.time = announcement.time
+        self.text = announcement.text
+        self.banana_time = Announcement.banana_time
+        self.selected_days = Announcement.selected_days
 
     def calculate_alert_time(self):
         return datetime.datetime.combine(datetime.date.today(), self.time)
@@ -58,15 +70,17 @@ class AnnouncementWorker(Process):
             # Sleep until next day warning
             time.sleep(1) # This is a hacky way to make it work
 
+# Announcement data class for storing the information of each minutes before announcement
 class MinsBeforeAnnouncement(Announcement):
     def __init__(self, mins_before, text):
         super().__init__(None, text)
         self.mins_before = mins_before
 
+# AnnouncementWorker class that makes use of multiprocessing to allow it to run standalone and sleep until the right time
 class MinsBeforeAnnouncementWorker(AnnouncementWorker):
-    def __init__(self, id, mins_before, text, banana_time, selected_days):
-        super().__init__(id, None, text, banana_time, selected_days)
-        self.mins_before = mins_before
+    def __init__(self, announcement: MinsBeforeAnnouncement):
+        super().__init__(announcement)
+        self.mins_before = announcement.mins_before
 
     def calculate_alert_time(self):
         normalised_time = datetime.datetime.combine(datetime.date.today(), self.banana_time)
