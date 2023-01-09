@@ -2,32 +2,31 @@
 
 {% block body %}
 
-<div class="vh-100 bg-black w-100">
-    <div class="container-landing landing-text-container hero-image">
-        <div class="">
-            <h1 class="text-uppercase text-white landing-header">The Worldwide Phenomenon Taking the World By Storm!
+<div class="w-100 landing-section">
+    <div class="flex-container">
+        <div class="landing-item ">
+            <h1 class="text-uppercase landing-header">The <span class="text-highlight">Phenomenon</span> Taking the
+                World By Storm!
             </h1>
-            <p class="text-white landing-text"> As other colleagues began to join in the fun something magical began to stir behind the scenes. And thus,
+            <p class="landing-text"> As other colleagues began to join in the fun something magical began to stir behind
+                the scenes. And thus,
                 BananaBot (BB for short) was born.</p>
         </div>
-    </div>
-
-    <div class="container-fluid">
-        <h2>Banana time in</h2>
+        <div class="hero-image landing-item"></div>
     </div>
 </div>
 
-<hr>
-
-<div class="container">
-    <div class="row">
-        <h1>Banana Time will be at {{ banana_time }} today!</h1>
-    </div>
+<div class="w-100 banana-info">
+    <h2 class="banana-time-logo">Banana Time In</h1>
+        <div class="banana-times">
+            <h2 class="banana-time-label"><span class="banana-time-number">20</span> HOURS</h1>
+                <h2 class="banana-time-label"><span class="banana-time-number">54</span> MINUTES</h1>
+                    <h2 class="banana-time-label"><span class="banana-time-number">7</span> SECONDS</h1>
+        </div>
+        <h2 class="banana-actual-time">{{ banana_time }}</h1>
 </div>
 
-<hr>
-
-<div class="container">
+<div class="container announcement-container">
     <div class="col-xs-12">
         <h1>Scheduled Announcements</h1>
         <div class="row g-3">

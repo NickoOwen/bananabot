@@ -9,6 +9,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css"
         href="{{ url_for('static', filename='styles/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="/static/styles/banana-styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
@@ -18,48 +19,10 @@
 </head>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap');
-
-    body {
-        font-family: 'Montserrat', sans-serif !important;
-    }
-
-    .landing-header {
-        font-weight: 900;
-        line-height: 64px;
-        font-size: 60px;
-    }
-
-    .hero-image {
-        background-image: url("static/banana-background.jpg");
-        /* The image used */
-        background-position: center;
-        /* Center the image */
-        background-repeat: no-repeat;
-        /* Do not repeat the image */
-        background-size: cover;
-        /* Resize the background image to cover the entire container */
-    }
-
-    .landing-text{
-        font-size: 20px;
-        font-weight: 500;
-        padding-right: 10%;
-    }
-
-    .container-landing{
-        padding: 80px;
-        display: flex;
-        align-items: center;
-    }
-
-    .landing-text-container{
-        padding-right: 60%;
-        height: 700px;
-    }
 </style>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg banana-bar">
         <div class="container-fluid w-100">
             <a class="navbar-brand" href="/">BananaBot</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"

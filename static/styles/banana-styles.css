@@ -1,0 +1,154 @@
+body {
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+.landing-item {
+    display: flex;
+    flex: 1 1 0px;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 50px;
+}
+
+.landing-header {
+    font-weight: 900;
+    line-height: 56px;
+    font-size: 55px;
+    padding-right: 5%;
+    color: #2C070B;
+}
+
+.landing-text {
+    padding-right: 10%;
+    font-size: 20px;
+    font-weight: 500;
+    color: #2C0A0A;
+}
+
+.text-highlight {
+    background-color: #F23B4F;
+    color: white;
+    padding-left: 8px;
+    padding-right: 8px;
+    display: inline-block;
+    height: 56px;
+}
+
+@media (max-width: 986px) {
+    .landing-header {
+        line-height: 30px;
+        font-size: 32px;
+        padding-right: 5%;
+        padding-left: 5px;
+    }
+
+    .text-highlight {
+        height: 32px;
+    }
+
+    .landing-text {
+        font-size: 16px;
+    }
+
+    .landing-item {
+        padding: 20px;
+    }
+}
+
+.landing-section {
+    height: 780px;
+}
+
+.banana-bar {
+    position: absolute;
+    padding-left: 40px;
+}
+
+.hero-image {
+    background-image: url("/static/banana-background-2-min.jpg");
+    /* The image used */
+    background-position: 50% 40%;
+    /* Center the image */
+    background-repeat: no-repeat;
+    /* Do not repeat the image */
+    background-size: cover;
+    /* Resize the background image to cover the entire container */
+}
+
+.flex-container {
+    display: flex;
+    height: 100%;
+}
+
+
+.banana-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #FDFCE5;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.banana-time-logo {
+    text-transform: uppercase;
+    background-color: #FFB542;
+    font-size: 23px;
+    font-weight: 900;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 20px;
+}
+
+.banana-times {
+    display: flex;
+    margin-top: 20px;
+    column-gap: 150px;
+    margin-left: 42px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 986px) {
+    .banana-times {
+        flex-direction: column;
+        row-gap: 50px;
+        margin-left: 0px;
+    }
+}
+
+.banana-time-label {
+    font-size: 35px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.banana-time-number {
+    font-size: 60px;
+    line-height: 50px;
+    display: block;
+}
+
+.banana-actual-time {
+    font-weight: 900;
+    font-size: 23px;
+}
+
+.container-landing {
+    padding: 80px;
+    display: flex;
+    align-items: center;
+}
+
+.landing-text-container {
+    padding-right: 60%;
+    height: 700px;
+}
+
+.announcement-container {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
