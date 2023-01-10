@@ -46,29 +46,24 @@ class AnnouncementWorker(Process):
             
             sleep_time = alert_time - current_time
             sleep_time_seconds = sleep_time.seconds
-            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement with ID " + str(self.id) + " is sleeping for " + str(sleep_time_seconds) + " seconds")
+            print(f"[{str(datetime.datetime.now())}] DEBUG - Announcement with ID {str(self.id)} is sleeping for {str(sleep_time_seconds)} seconds")
             time.sleep(sleep_time_seconds + 1) # Offset by 1 second
 
             # POST Request to send message
             current_day = datetime.datetime.now().strftime('%A').lower()
-            print("[" + str(datetime.datetime.now()) + "] DEBUG - Announcement (id: " + str(self.id) + ") post on " + current_day + ": " + str(self.selected_days[current_day]))
+            print(f"[{str(datetime.datetime.now())}] DEBUG - Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
             if self.selected_days[current_day]:
                 url = 'https://your.endpoint.here'
-
-                headers = {
-                    # Already added when you pass json= but not when you pass data=
-                    # 'Content-Type': 'application/json'
-                }
 
                 json_data = {
                     'text': self.text
                 }
 
-                # requests.post(url, headers=headers, json=json_data, verify=False)
-                print("[" + str(datetime.datetime.now()) + "] INFO - Request sent with message: " + self.text)
+                requests.post(url, json=json_data, verify=False)
+                print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {self.text}")
 
             # Sleep until next day warning
-            time.sleep(1) # This is a hacky way to make it work
+            time.sleep(1)
 
 # Announcement data class for storing the information of each minutes before announcement
 class MinsBeforeAnnouncement(Announcement):
