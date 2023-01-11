@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - The ability to configure which days of the week announcements are sent
 - Updated the readme to provide a bit more context around BananaBot's intended purpose
+- Switched the `AnnouncementWorker` classes to take an `Announcement` object 
 
 ## [3.1.0] - 2022-11-26
 

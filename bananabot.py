@@ -29,18 +29,6 @@ def verify_password(username, password):
 announcements = {}
 workers = {}
 active = False
-Announcement.banana_time = datetime.time(15, 30, 0)
-
-# Keeps track of which days are selected to send alerts on
-selected_days = {
-    "monday": True,
-    "tuesday": True,
-    "wednesday": True,
-    "thursday": True,
-    "friday": True,
-    "saturday": False,
-    "sunday": False
-}
 
 # Create the banana time announcement
 banana_time_announcement = Announcement(Announcement.banana_time, "# @HERE Banana Time!")
@@ -63,14 +51,13 @@ for announcement in initial_announcements:
 def start():
     for key in announcements:
         if isinstance(announcements[key], MinsBeforeAnnouncement):
-            worker = MinsBeforeAnnouncementWorker(announcements[key].id, announcements[key].mins_before, announcements[key].text, Announcement.banana_time, selected_days)
+            worker = MinsBeforeAnnouncementWorker(announcements[key])
             workers[worker.id] = worker
             workers[worker.id].start()
         else:
-            worker = AnnouncementWorker(announcements[key].id, announcements[key].time, announcements[key].text, Announcement.banana_time, selected_days)
+            worker = AnnouncementWorker(announcements[key])
             workers[worker.id] = worker
             workers[worker.id].start()
-
 
 def stop():
     for key in workers:
@@ -88,10 +75,10 @@ def string_to_time(new_time):
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
 
 def set_banana_time(time):
-    app.logger.debug("Requested banana time " + time)
+    app.logger.debug(f"Requested banana time: {time}")
     Announcement.banana_time = string_to_time(time)
     announcements['banana_time'].time = Announcement.banana_time    
-    app.logger.info("New banana time set at " + str(Announcement.banana_time))
+    app.logger.info(f"New banana time set at {str(Announcement.banana_time)}")
 
     update()
 
@@ -106,7 +93,7 @@ def add_announcement(time, text):
     announcements[new_announcement.id] = new_announcement
 
     if active:
-        worker = AnnouncementWorker(new_announcement.id, new_announcement.time, new_announcement.text, Announcement.banana_time, selected_days)
+        worker = AnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
 
@@ -116,10 +103,10 @@ def add_mins_before_announcement(mins_before, text):
     new_announcement = MinsBeforeAnnouncement(mins_before, text)
     announcements[new_announcement.id] = new_announcement
 
-    app.logger.info("Added new announcement " + str(mins_before) + " minutes before banana time")
+    app.logger.info(f"Added new announcement {str(mins_before)} minutes before banana time")
 
     if active:
-        worker = MinsBeforeAnnouncementWorker(new_announcement.id, new_announcement.mins_before, new_announcement.text, Announcement.banana_time, selected_days)
+        worker = MinsBeforeAnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
 
@@ -135,26 +122,27 @@ def remove_announcement(id):
         workers[id].terminate()
         workers.pop(id)
 
-    app.logger.info("Removed announcement with ID: " + str(id))
+    app.logger.info(f"Removed announcement with ID: {str(id)}")
 
 def toggle_status():
     if not globals()['active']:
         globals()['active'] = True
         start()
-        app.logger.info("BananaBot is now Active")
+        app.logger.info("BananaBot is now ACTIVE")
     else:
         globals()['active'] = False
         stop()
-        app.logger.info("BananaBot is now Inactive")
+        app.logger.info("BananaBot is now INACTIVE")
 
 def update_selected_days(new_selected_days):
     app.logger.info("Updating selected days")
 
     # Update selected_days
-    globals()['selected_days'] = new_selected_days
-    app.logger.info("Updated days: " + str(globals()['selected_days']))
+    Announcement.selected_days = new_selected_days
+    app.logger.info(f"Updated days: {str(Announcement.selected_days)}")
     
     update()
+
 
 # Flask Routes
 app = Flask(__name__)
@@ -191,17 +179,17 @@ def admin():
             case 'add_mins_before_announcement':
                 add_mins_before_announcement(request.form['mins_before'], request.form['text'])
             case 'day_selector':
-                app.logger.debug("Selected days form: " + str(request.form))
-                update_selected_days(dict((day, request.form.get(day, False) == 'on') for day in selected_days))
+                app.logger.debug(f"Selected days form: {str(request.form)}")
+                update_selected_days(dict((day, request.form.get(day, False) == 'on') for day in Announcement.selected_days))
             case _:
-                app.logger.error("form_id: " + form_id + " not recognised")
+                app.logger.error(f"form_id: {form_id} not recognised")
 
         return redirect(url_for('admin'))
 
     return render_template('admin.html',
         announcements = announcements,
         status = active,
-        selected_days = selected_days)
+        selected_days = Announcement.selected_days)
 
 
 # Main
