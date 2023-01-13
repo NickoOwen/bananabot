@@ -97,6 +97,8 @@ def add_announcement(time, text):
         workers[worker.id] = worker
         workers[worker.id].start()
 
+    return new_announcement.id
+
 def add_mins_before_announcement(mins_before, text):
     mins_before = int(mins_before)
 
@@ -110,10 +112,12 @@ def add_mins_before_announcement(mins_before, text):
         workers[worker.id] = worker
         workers[worker.id].start()
 
+    return new_announcement.id
+
 def remove_announcement(id):
     if id == 'banana_time':
-        app.logger.warn("Attempted to remove banana_time announcement. This action is not permitted")
-        return
+        app.logger.warning("Attempted to remove banana_time announcement. This action is not permitted")
+        return False
 
     id = int(id)
     announcements.pop(id)
@@ -123,6 +127,7 @@ def remove_announcement(id):
         workers.pop(id)
 
     app.logger.info(f"Removed announcement with ID: {str(id)}")
+    return True
 
 def toggle_status():
     if not globals()['active']:
