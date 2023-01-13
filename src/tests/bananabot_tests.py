@@ -1,5 +1,3 @@
-# import pytest
-from bananabot import app # Flask instance of the API
 from bananabot import *
 
 class TestDefaultConfig:

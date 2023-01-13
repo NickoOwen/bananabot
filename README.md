@@ -13,7 +13,7 @@ Set the `url` variable in [announcements.py](./announcements.py) so that it poin
 
 To build the BananaBot Docker image, run the following command from within this directory
 ```
-docker build -t bananabot .
+docker build -t bananabot src
 ```
 
 ## Deploy
@@ -36,7 +36,23 @@ pip install -r requirements.txt
 
 Then run `bananabot.py`
 ```
-python3 bananabot.py
+python3 src/bananabot.py
+```
+
+## Contributing
+
+### Development Environment Setup
+
+Setup your development environment by running the following command
+```
+pip install -r requirements.txt
+```
+
+### Running Tests
+
+To run the unit tests, run the following command from within the `src` directory
+```
+python3 -m pytest ./tests
 ```
 
 ## Changelog
