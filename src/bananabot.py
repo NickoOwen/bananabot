@@ -59,11 +59,15 @@ def start():
             workers[worker.id] = worker
             workers[worker.id].start()
 
+    return True
+
 def stop():
     for key in workers:
         workers[key].terminate()
     
     globals()['workers'] = {}
+
+    return True
 
 def update():
     if active:
@@ -138,6 +142,8 @@ def toggle_status():
         globals()['active'] = False
         stop()
         app.logger.info("BananaBot is now INACTIVE")
+    
+    return active
 
 def update_selected_days(new_selected_days):
     app.logger.info("Updating selected days")

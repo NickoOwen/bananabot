@@ -46,17 +46,18 @@ class TestFunctions:
         remove_announcement(announcement_id)
         assert (announcement_id in announcements) == False
 
+    def test_toggle_status(self, mocker):
+        # Mock functions
+        mocker.patch('bananabot.start', return_value=True)
+        mocker.patch('bananabot.stop', return_value=False)
+
+        assert toggle_status() == True
+        assert toggle_status() == False
+
     def test_removing_banana_time_announcement(self):
         assert "banana_time" in announcements
         assert remove_announcement("banana_time") == False
         assert "banana_time" in announcements
-
-    # Test activates multiprocessing Process objects which seems to cause errors
-    # Will need to look into this more
-    # def test_toggle_status(self):
-    #     assert active == False
-    #     toggle_status()
-    #     assert active == True
 
     def test_update_selected_days(self):
         expected = {
