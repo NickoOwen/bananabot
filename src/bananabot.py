@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from announcements import *
+from announcement import *
 
 # Authentication
 auth = HTTPBasicAuth()
@@ -71,6 +71,7 @@ def stop():
 
 def update():
     if active:
+        app.logger.debug("Updating workers...")
         stop()
         start()
 
@@ -87,16 +88,19 @@ def set_banana_time(time):
     update()
 
 def set_banana_time_text(text):
+    app.logger.debug(f"Requested banana time text: {text}")
     announcements['banana_time'].text = text
 
-    if active:
-        workers['banana_time'].text = text
+    update()
+        
 
 def add_announcement(time, text):
+    app.logger.info(f"Adding new announcement for {time} with message: {text}")
     new_announcement = Announcement(string_to_time(time), text)
     announcements[new_announcement.id] = new_announcement
 
     if active:
+        app.logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
         worker = AnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
@@ -104,14 +108,14 @@ def add_announcement(time, text):
     return new_announcement.id
 
 def add_mins_before_announcement(mins_before, text):
+    app.logger.info(f"Adding new announcement for {mins_before} minutes before banana time with message: {text}")
     mins_before = int(mins_before)
 
     new_announcement = MinsBeforeAnnouncement(mins_before, text)
     announcements[new_announcement.id] = new_announcement
 
-    app.logger.info(f"Added new announcement {str(mins_before)} minutes before banana time")
-
     if active:
+        app.logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
         worker = MinsBeforeAnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
@@ -127,10 +131,11 @@ def remove_announcement(id):
     announcements.pop(id)
 
     if active:
+        app.logger.info(f"Terminating worker with ID {str(id)}")
         workers[id].terminate()
         workers.pop(id)
 
-    app.logger.info(f"Removed announcement with ID: {str(id)}")
+    app.logger.info(f"Announcement with ID {str(id)} has been removed")
     return True
 
 def toggle_status():
@@ -174,7 +179,7 @@ def about():
 def admin():
     if request.method == 'POST':
         form_id = request.form['form_id']
-        app.logger.debug("Form ID: " + str(form_id))
+        app.logger.debug(f"POST received with form_id: {str(form_id)}")
 
         match form_id:
             case 'status':
@@ -206,4 +211,6 @@ def admin():
 # Main
 if __name__ == "__main__":
     print("Admin Password: " + pw)
+    del pw
+
     app.run(host='0.0.0.0', port='8000', debug=True, use_reloader=False)
