@@ -11,7 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AJAX requests to make the UI experience smoother, more robust, and eliminate the need to refresh the page when a change is made
 - The ability to send a message instantly from the admin UI
 
-## [3.2.0]
+## [3.3.0]
+
+#### Added
+- Unit tests using `pytest`
+- Modified the project structure to make it easier to maintain and allow unit tests to import easily
+- Additional logging throughout the application to make debugging potential issues easier
+
+#### Fixed
+- Fixed a bug where setting the banana time message would not take immediate effect
+
+## [3.2.0] - 2023-01-10
 
 #### Added
 - The ability to configure which days of the week announcements are sent

@@ -26,16 +26,16 @@ def verify_password(username, password):
 
 
 # Banana Time Variables
-announcements = {}
-workers = {}
-active = False
+announcements = {}  # Stores the announcements
+workers = {}        # Stores the workers
+active = False      # Stores the current status of the system (i.e. whether bananabot needs to send requests)
 
 # Create the banana time announcement
 banana_time_announcement = Announcement(Announcement.banana_time, "# @HERE Banana Time!")
 banana_time_announcement.id = "banana_time"
 
-# Initial announcements
-initial_announcements = [
+# Create the default announcements
+default_announcements = [
     banana_time_announcement,
     Announcement(datetime.time(10, 0, 0), "Banana time is at 15:30 today!"),
     MinsBeforeAnnouncement(60, "Banana time is in 60 minutes!"),
@@ -43,7 +43,8 @@ initial_announcements = [
     MinsBeforeAnnouncement(10, "Banana time is in 10 minutes!")
 ]
 
-for announcement in initial_announcements:
+# Add the default announcements to the announcements dictionary
+for announcement in default_announcements:
     announcements[announcement.id] = announcement
 
 
@@ -66,7 +67,6 @@ def stop():
         workers[key].terminate()
     
     globals()['workers'] = {}
-
     return True
 
 def update():
@@ -85,15 +85,16 @@ def set_banana_time(time):
     announcements['banana_time'].time = Announcement.banana_time    
     app.logger.info(f"New banana time set at {str(Announcement.banana_time)}")
 
+    # Call update so any current workers can be updated
     update()
 
 def set_banana_time_text(text):
     app.logger.debug(f"Requested banana time text: {text}")
     announcements['banana_time'].text = text
 
+    # Call update so any current workers can be updated
     update()
         
-
 def add_announcement(time, text):
     app.logger.info(f"Adding new announcement for {time} with message: {text}")
     new_announcement = Announcement(string_to_time(time), text)
@@ -157,6 +158,7 @@ def update_selected_days(new_selected_days):
     Announcement.selected_days = new_selected_days
     app.logger.info(f"Updated days: {str(Announcement.selected_days)}")
     
+    # Call so any current workers can be updated
     update()
 
 
