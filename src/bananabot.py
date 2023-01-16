@@ -49,6 +49,7 @@ for announcement in default_announcements:
 
 
 # Banana Time Functions
+# Creates all the workers using the announcements data
 def start():
     for key in announcements:
         if isinstance(announcements[key], MinsBeforeAnnouncement):
@@ -62,6 +63,7 @@ def start():
 
     return True
 
+# Terminates all workers
 def stop():
     for key in workers:
         workers[key].terminate()
@@ -69,6 +71,7 @@ def stop():
     globals()['workers'] = {}
     return True
 
+# Used to terminate and re-create all workers so they are updated with the latest system changes
 def update():
     if active:
         app.logger.debug("Updating workers...")
