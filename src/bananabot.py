@@ -49,8 +49,9 @@ for announcement in default_announcements:
 
 
 # Banana Time Functions
-# Creates all the workers using the announcements data
 def start():
+    """Creates all the workers using the data from announcements. Returns True if successful"""
+
     for key in announcements:
         if isinstance(announcements[key], MinsBeforeAnnouncement):
             worker = MinsBeforeAnnouncementWorker(announcements[key])
@@ -63,26 +64,37 @@ def start():
 
     return True
 
-# Terminates all workers
 def stop():
+    """Terminates all running workers. Returns True if successful"""
+
+    # Check if the workers dictionary is empty
+    if not workers:
+        app.logger.warning("Tried to stop workers when no workers exist")
+        return
+
     for key in workers:
         workers[key].terminate()
     
     globals()['workers'] = {}
     return True
 
-# Used to terminate and re-create all workers so they are updated with the latest system changes
 def update():
+    """Terminates and re-creates all workers so they are updated with the latest system changes"""
+    
     if active:
         app.logger.debug("Updating workers...")
         stop()
         start()
 
 def string_to_time(new_time):
+    """Takes a string as input and returns a datetime.time object"""
+
     t = time.strptime(new_time, "%H:%M")
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
 
 def set_banana_time(time):
+    """Sets banana time"""
+
     app.logger.debug(f"Requested banana time: {time}")
     Announcement.banana_time = string_to_time(time)
     announcements['banana_time'].time = Announcement.banana_time    
@@ -92,6 +104,8 @@ def set_banana_time(time):
     update()
 
 def set_banana_time_text(text):
+    """Sets the text for the banana time announcement"""
+
     app.logger.debug(f"Requested banana time text: {text}")
     announcements['banana_time'].text = text
 
@@ -99,6 +113,8 @@ def set_banana_time_text(text):
     update()
         
 def add_announcement(time, text):
+    """Adds a new announcement with the given time and text"""
+
     app.logger.info(f"Adding new announcement for {time} with message: {text}")
     new_announcement = Announcement(string_to_time(time), text)
     announcements[new_announcement.id] = new_announcement
@@ -112,6 +128,8 @@ def add_announcement(time, text):
     return new_announcement.id
 
 def add_mins_before_announcement(mins_before, text):
+    """Adds a new announcement for the given 'mins_before' banana time with the given text"""
+
     app.logger.info(f"Adding new announcement for {mins_before} minutes before banana time with message: {text}")
     mins_before = int(mins_before)
 
@@ -127,6 +145,8 @@ def add_mins_before_announcement(mins_before, text):
     return new_announcement.id
 
 def remove_announcement(id):
+    """Removes the announcement with the given id. Returns True if successful"""
+
     if id == 'banana_time':
         app.logger.warning("Attempted to remove banana_time announcement. This action is not permitted")
         return False
@@ -143,18 +163,24 @@ def remove_announcement(id):
     return True
 
 def toggle_status():
-    if not globals()['active']:
-        globals()['active'] = True
+    """Toggles the status of the system (active). Returns the new value of active"""
+    
+    global active
+
+    if not active:
+        active = True
         start()
         app.logger.info("BananaBot is now ACTIVE")
     else:
-        globals()['active'] = False
+        active = False
         stop()
         app.logger.info("BananaBot is now INACTIVE")
     
     return active
 
 def update_selected_days(new_selected_days):
+    """Updates the selected_days with new_selected_days"""
+
     app.logger.info("Updating selected days")
 
     # Update selected_days
