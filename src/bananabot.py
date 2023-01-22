@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from announcement import *
 
-# Authentication
+#### Authentication ####
 auth = HTTPBasicAuth()
 
 user = 'admin'
@@ -25,7 +25,7 @@ def verify_password(username, password):
     return False
 
 
-# Banana Time Variables
+#### Banana Time Variables ####
 announcements = {}  # Stores the announcements
 workers = {}        # Stores the workers
 active = False      # Stores the current status of the system (i.e. whether bananabot needs to send requests)
@@ -48,9 +48,13 @@ for announcement in default_announcements:
     announcements[announcement.id] = announcement
 
 
-# Banana Time Functions
+#### Banana Time Functions ####
 def start():
     """Creates all the workers using the data from announcements. Returns True if successful"""
+
+    if workers:
+        app.logger.warning("Found running workers when attempting to create workers. Expected 'workers' to be empty")
+        return False
 
     for key in announcements:
         if isinstance(announcements[key], MinsBeforeAnnouncement):
@@ -67,15 +71,17 @@ def start():
 def stop():
     """Terminates all running workers. Returns True if successful"""
 
+    global workers
+
     # Check if the workers dictionary is empty
     if not workers:
         app.logger.warning("Tried to stop workers when no workers exist")
-        return
+        return False
 
     for key in workers:
         workers[key].terminate()
     
-    globals()['workers'] = {}
+    workers = {}
     return True
 
 def update():
@@ -100,7 +106,7 @@ def set_banana_time(time):
     announcements['banana_time'].time = Announcement.banana_time    
     app.logger.info(f"New banana time set at {str(Announcement.banana_time)}")
 
-    # Call update so any current workers can be updated
+    # Call update so any running workers can be updated
     update()
 
 def set_banana_time_text(text):
@@ -109,7 +115,7 @@ def set_banana_time_text(text):
     app.logger.debug(f"Requested banana time text: {text}")
     announcements['banana_time'].text = text
 
-    # Call update so any current workers can be updated
+    # Call update so any running workers can be updated
     update()
         
 def add_announcement(time, text):
@@ -191,7 +197,7 @@ def update_selected_days(new_selected_days):
     update()
 
 
-# Flask Routes
+#### Flask Routes ####
 app = Flask(__name__)
 
 @app.route('/')
@@ -239,7 +245,7 @@ def admin():
         selected_days = Announcement.selected_days)
 
 
-# Main
+#### Main ####
 if __name__ == "__main__":
     print("Admin Password: " + pw)
     del pw

@@ -19,6 +19,16 @@ class TestDefaultConfig:
 
 
 class TestFunctions:
+    def test_start(self, mocker):
+        mocker.patch('bananabot.workers', {"1": 1, "2": 2})
+
+        assert start() == False
+
+    def test_stop(self, mocker):
+        mocker.patch('bananabot.workers', {})
+
+        assert stop() == False
+
     def test_string_to_time(self):
         result = string_to_time("15:30")
         assert type(result) == datetime.time
@@ -28,13 +38,17 @@ class TestFunctions:
         set_banana_time("11:45")
         assert Announcement.banana_time == datetime.time(11, 45, 0)
 
-    def test_add_announcement(self):
+    def test_add_announcement(self, mocker):
+        mocker.patch('bananabot.active', False)
+
         announcement_id = add_announcement("9:03", "Test at 9:03 AM")
         assert announcement_id in announcements
         assert announcements[announcement_id].time == datetime.time(9, 3, 0)
         assert announcements[announcement_id].text == "Test at 9:03 AM"
 
-    def test_add_mins_before_announcement(self):
+    def test_add_mins_before_announcement(self, mocker):
+        mocker.patch('bananabot.active', False)
+
         announcement_id = add_mins_before_announcement("24", "Test at 24 minutes before")
         assert announcement_id in announcements
         assert announcements[announcement_id].mins_before == 24
