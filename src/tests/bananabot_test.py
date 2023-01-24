@@ -34,7 +34,10 @@ class TestFunctions:
         assert type(result) == datetime.time
 
     def test_set_banana_time(self):
+        # Ensure banana_time is set to the default value
+        Announcement.banana_time = datetime.time(15, 30, 0)
         assert Announcement.banana_time == datetime.time(15, 30, 0)
+
         set_banana_time("11:45")
         assert Announcement.banana_time == datetime.time(11, 45, 0)
 
@@ -57,6 +60,7 @@ class TestFunctions:
     def test_remove_announcement(self):
         announcement_id = add_announcement("9:00", "Test remove_announcement()")
         assert announcement_id in announcements
+        
         remove_announcement(announcement_id)
         assert (announcement_id in announcements) == False
 

@@ -5,7 +5,7 @@ RUN useradd --create-home --shell /bin/bash bananabot
 USER bananabot
 RUN pip install Flask==2.2.2 Flask-HTTPAuth==4.7.0 requests==2.25.1
 
-COPY bananabot.py announcements.py /home/bananabot/
+COPY bananabot.py announcement.py /home/bananabot/
 COPY templates /home/bananabot/templates/
 COPY static /home/bananabot/static/
 
