@@ -1,11 +1,20 @@
 # BananaBot
 
+## Table of Contents
+
+- [Description](#description)
+- [Configuration](#configuration)
+- [Build](#build)
+- [Deploy](#deploy)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
+
 ## Description
 BananaBot (BB for short) is a good little bot created to help make sure everyone has their daily banana on time. It provides a user-friendly admin page where an administrator can easily add and remove announcements and configure banana time itself.
 
 BananaBot is designed to send a `POST` request to a given endpoint, allowing it to work with many popular chat platforms (e.g. Slack) via [incoming webhooks](https://api.slack.com/messaging/webhooks). The logic for sending a request can be found in [announcements.py](./announcements.py) and can be modified to suit your needs if required.
 
-## Configure
+## Configuration
 
 Set the `url` variable in [announcements.py](./announcements.py) so that it points to the desired endpoint.
 
@@ -13,7 +22,7 @@ Set the `url` variable in [announcements.py](./announcements.py) so that it poin
 
 To build the BananaBot Docker image, run the following command from within this directory
 ```
-docker build -t bananabot .
+docker build -t bananabot src
 ```
 
 ## Deploy
@@ -36,7 +45,23 @@ pip install -r requirements.txt
 
 Then run `bananabot.py`
 ```
-python3 bananabot.py
+python3 src/bananabot.py
+```
+
+## Contributing
+
+### Development Environment Setup
+
+Setup your development environment by running the following command
+```
+pip install -r requirements.txt
+```
+
+### Running Tests
+
+To run the unit tests, run the following command from within the `src` directory
+```
+python3 -m pytest ./tests
 ```
 
 ## Changelog
