@@ -12,11 +12,11 @@
 ## Description
 BananaBot (BB for short) is a good little bot created to help make sure everyone has their daily banana on time. It provides a user-friendly admin page where an administrator can easily add and remove announcements and configure banana time itself.
 
-BananaBot is designed to send a `POST` request to a given endpoint, allowing it to work with many popular chat platforms (e.g. Slack) via [incoming webhooks](https://api.slack.com/messaging/webhooks). The logic for sending a request can be found in [announcements.py](./announcements.py) and can be modified to suit your needs if required.
+BananaBot is designed to send a `POST` request to a given endpoint, allowing it to work with many popular chat platforms (e.g. Slack) via [incoming webhooks](https://api.slack.com/messaging/webhooks). The logic for sending a request can be found in [src/announcement.py](./src/announcement.py) and can be modified to suit your needs if required.
 
 ## Configuration
 
-Set the `url` variable in [announcements.py](./announcements.py) so that it points to the desired endpoint.
+Set the `url` variable in [src/announcement.py](./src/announcement.py) so that it points to the desired endpoint.
 
 ## Build
 
