@@ -116,6 +116,30 @@ class AnnouncementWorker(Process):
             # Sleep until next day warning
             time.sleep(1)
 
+class InstantAnnouncement():
+    """
+    A class used to send a message instantly.
+    """
+
+    def __init__(self, text):
+        """
+        Parameters
+        ----------
+        text : str
+            The message that will be sent
+        """
+
+        self.text = text
+
+        # POST Request to send message
+        url = 'http://your.endpoint.here'
+
+        json_data = {
+            'text': self.text
+        }
+
+        requests.post(url, json=json_data, verify=False)
+
 class MinsBeforeAnnouncement(Announcement):
     """
     A class used to store the data for a minutes before Announcement. Inherits from Announcement
@@ -148,22 +172,6 @@ class MinsBeforeAnnouncement(Announcement):
         self.mins_before = mins_before
 
 class MinsBeforeAnnouncementWorker(AnnouncementWorker):
-    """
-    A class that inherits AnnouncementWorker and is used to send announcements a set number of minutes before banana time
-
-    Attributes
-    ----------
-    id : int
-        the announcement's id
-    mins_before : int
-            how many minutes before banana time to send the announcement
-    text : str
-        the message that will be sent
-    banana_time : datetime.time
-        banana time
-    selected_days :
-        a dictionary that stores the days announcements should be sent
-    """
 
     def __init__(self, announcement: MinsBeforeAnnouncement):
         """
