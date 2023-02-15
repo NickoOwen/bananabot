@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The ability to send a message instantly from the admin UI
 - The ability to store state to enable persistence across container / app reboots
 
+## [3.3.0] - 2023-02-15
+
+#### Added
+- Added instant messaging feature to the admin page where an admin can instantly send a message
+
 ## [3.2.1] - 2023-01-26
 
 #### Added

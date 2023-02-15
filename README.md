@@ -16,7 +16,7 @@ BananaBot is designed to send a `POST` request to a given endpoint, allowing it 
 
 ## Configuration
 
-Set the `url` variable in [src/announcement.py](./src/announcement.py) so that it points to the desired endpoint.
+Set the `url` class variable in [src/announcement.py](./src/announcement.py) so that it points to the desired endpoint.
 
 ## Build
 
