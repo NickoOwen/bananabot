@@ -12,6 +12,8 @@ class Announcement:
     ----------
     banana_time : datetime.time
         banana time
+    url : str
+        the url where the request will be sent
     selected_days :
         a dictionary that stores the days announcements should be sent
     id : int
@@ -24,6 +26,8 @@ class Announcement:
 
     id_iter = itertools.count()
     banana_time = datetime.time(15, 30, 0)
+    url = 'http://your.endpoint.here' # Change this to your endpoint
+
     # Keeps track of what days the announcements should be sent
     selected_days = {
         "monday": True,
@@ -48,6 +52,17 @@ class Announcement:
         self.id = next(self.id_iter)
         self.time = time
         self.text = text
+
+    @staticmethod
+    def send_message(text):
+        json_data = {
+            'text': text
+        }
+
+        # POST Request to send message
+        requests.post(Announcement.url, json=json_data, verify=False)
+        print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {text}")
+
 
 class AnnouncementWorker(Process):
     """
@@ -104,41 +119,10 @@ class AnnouncementWorker(Process):
             current_day = datetime.datetime.now().strftime('%A').lower()
             print(f"[{str(datetime.datetime.now())}] DEBUG - Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
             if self.selected_days[current_day]:
-                url = 'https://your.endpoint.here'
-
-                json_data = {
-                    'text': self.text
-                }
-
-                requests.post(url, json=json_data, verify=False)
-                print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {self.text}")
+                Announcement.send_message(self.text)
 
             # Sleep until next day warning
             time.sleep(1)
-
-class InstantAnnouncement():
-    """
-    A class used to send a message instantly.
-    """
-
-    def __init__(self, text):
-        """
-        Parameters
-        ----------
-        text : str
-            The message that will be sent
-        """
-
-        self.text = text
-
-        # POST Request to send message
-        url = 'http://your.endpoint.here'
-
-        json_data = {
-            'text': self.text
-        }
-
-        requests.post(url, json=json_data, verify=False)
 
 class MinsBeforeAnnouncement(Announcement):
     """

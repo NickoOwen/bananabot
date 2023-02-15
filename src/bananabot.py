@@ -31,16 +31,16 @@ workers = {}        # Stores the workers
 active = False      # Stores the current status of the system (i.e. whether bananabot needs to send requests)
 
 # Create the banana time announcement
-banana_time_announcement = Announcement(Announcement.banana_time, "# @HERE Banana Time!")
+banana_time_announcement = Announcement(Announcement.banana_time, "@HERE Banana Time!")
 banana_time_announcement.id = "banana_time"
 
 # Create the default announcements
 default_announcements = [
     banana_time_announcement,
-    Announcement(datetime.time(10, 0, 0), "# Banana time is at 15:30 today!"),
-    MinsBeforeAnnouncement(60, "# Banana time is in 60 minutes!"),
-    MinsBeforeAnnouncement(30, "# Banana time is in 30 minutes!"),
-    MinsBeforeAnnouncement(10, "# Banana time is in 10 minutes!")
+    Announcement(datetime.time(10, 0, 0), "Banana time is at 15:30 today!"),
+    MinsBeforeAnnouncement(60, "Banana time is in 60 minutes!"),
+    MinsBeforeAnnouncement(30, "Banana time is in 30 minutes!"),
+    MinsBeforeAnnouncement(10, "Banana time is in 10 minutes!")
 ]
 
 # Add the default announcements to the announcements dictionary
@@ -154,7 +154,7 @@ def instant_message(text):
     """Sends a new message instantly"""
 
     app.logger.info(f"Sending instant message with message: {text}")
-    InstantAnnouncement(text)
+    Announcement.send_message(text)
 
 def remove_announcement(id):
     """Removes the announcement with the given id. Returns True if successful"""
