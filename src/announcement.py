@@ -3,6 +3,7 @@ import time
 import requests
 import itertools
 from multiprocessing import Process
+from pydantic import BaseModel
 
 class Announcement:
     """
@@ -53,6 +54,7 @@ class Announcement:
         self.time = time
         self.text = text
 
+
     @staticmethod
     def send_message(text):
         json_data = {
@@ -60,9 +62,14 @@ class Announcement:
         }
 
         # POST Request to send message
-        requests.post(Announcement.url, json=json_data, verify=False)
+        # requests.post(Announcement.url, json=json_data, verify=False)
         print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {text}")
 
+class AnnouncementData(BaseModel):
+    type: str
+    time: str = None
+    text: str
+    mins_before: int = None
 
 class AnnouncementWorker(Process):
     """

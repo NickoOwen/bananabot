@@ -2,9 +2,14 @@ import datetime
 import time
 import random
 import string
-from flask import Flask, render_template, request, redirect, url_for
+# from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from fastapi import FastAPI, status, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from announcement import *
 
@@ -31,7 +36,7 @@ workers = {}        # Stores the workers
 active = False      # Stores the current status of the system (i.e. whether bananabot needs to send requests)
 
 # Create the banana time announcement
-banana_time_announcement = Announcement(Announcement.banana_time, "@HERE Banana Time!")
+banana_time_announcement = Announcement(datetime.time(15, 30, 0), "# @HERE Banana Time!")
 banana_time_announcement.id = "banana_time"
 
 # Create the default announcements
@@ -118,15 +123,15 @@ def set_banana_time_text(text):
     # Call update so any running workers can be updated
     update()
         
-def add_announcement(time, text):
+def add_time_announcement(time, text):
     """Adds a new announcement with the given time and text"""
 
-    app.logger.info(f"Adding new announcement for {time} with message: {text}")
+    # app.logger.info(f"Adding new announcement for {time} with message: {text}")
     new_announcement = Announcement(string_to_time(time), text)
     announcements[new_announcement.id] = new_announcement
 
     if active:
-        app.logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
+        # app.logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
         worker = AnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
@@ -202,60 +207,43 @@ def update_selected_days(new_selected_days):
     # Call so any current workers can be updated
     update()
 
+#### API Endpoints ####
+app = FastAPI()
 
-#### Flask Routes ####
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return render_template('index.html',
-        banana_time = Announcement.banana_time.strftime("%H:%M"),
-        announcements = announcements,
-        status = active)
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/admin', methods=('GET', 'POST'))
-@auth.login_required
-def admin():
-    if request.method == 'POST':
-        form_id = request.form['form_id']
-        app.logger.debug(f"POST received with form_id: {str(form_id)}")
-
-        match form_id:
-            case 'status':
-                toggle_status()
-            case 'set_banana_time':
-                set_banana_time(request.form['banana_time'])
-            case 'set_banana_time_text':
-                set_banana_time_text(request.form['text'])
-            case 'remove_announcement':
-                remove_announcement(request.form['announcement_id'])
-            case 'add_announcement':
-                add_announcement(request.form['time'], request.form['text'])
-            case 'instant_message':
-                instant_message(request.form['text'])
-            case 'add_mins_before_announcement':
-                add_mins_before_announcement(request.form['mins_before'], request.form['text'])
-            case 'day_selector':
-                app.logger.debug(f"Selected days form: {str(request.form)}")
-                update_selected_days(dict((day, request.form.get(day, False) == 'on') for day in Announcement.selected_days))
-            case _:
-                app.logger.error(f"form_id: {form_id} not recognised")
-
-        return redirect(url_for('admin'))
-
-    return render_template('admin.html',
-        announcements = announcements,
-        status = active,
-        selected_days = Announcement.selected_days)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
-#### Main ####
-if __name__ == "__main__":
-    print("Admin Password: " + pw)
-    del pw
+@app.get('/announcements')
+def get_announcements():
+    return announcements
 
-    app.run(host='0.0.0.0', port='8000', debug=True, use_reloader=False)
+@app.post('/announcements', status_code=status.HTTP_201_CREATED)
+def add_announcement(announcement: AnnouncementData):
+    print(announcement.time)
+
+    match announcement.type:
+        case 'time':
+            add_time_announcement(announcement.time, announcement.text)
+        case 'mins_before':
+            add_mins_before_announcement(announcement.mins_before, announcement.text)
+        case 'instant':
+            Announcement.send_message(announcement.text)
+
+
+#### Web Pages ####
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "banana_time": Announcement.banana_time.strftime("%H:%M")
+        })
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin(request: Request):
+    return templates.TemplateResponse("admin.html", {
+        "request": request,
+        "announcements": announcements,
+        "status": active,
+        "selected_days": Announcement.selected_days
+    })

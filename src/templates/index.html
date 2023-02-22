@@ -1,56 +1,46 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block body %}
-<div class="container">
-    <h1>Welcome to Banana Bot!</h1>
-    <p>What started as one man's daily banana has taken the world by storm! As other colleagues began to join in the fun something magical began to stir behind the scenes. And thus, BananaBot (BB for short) was born.</p>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="static/styles/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="static/styles/css/styles.css">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"> -->
 
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vitae nisl nec risus tristique aliquam. Cras nec consequat dolor, sed volutpat odio. Nunc varius lectus quis enim convallis ultrices. Sed lorem orci, gravida id porta quis, condimentum sit amet libero. Duis sagittis porta finibus. Sed facilisis enim quis porttitor laoreet. Suspendisse aliquet finibus urna nec auctor. Sed tincidunt malesuada faucibus. Pellentesque eu mi in quam faucibus vulputate. Praesent vel odio maximus, congue metus mattis, dictum dolor.</p>
-
-    <p>Vivamus lacinia interdum neque, id elementum tortor rhoncus quis. Quisque in tempus mi, ut pulvinar turpis. Nam consectetur metus quis velit pulvinar euismod. Pellentesque cursus iaculis congue. Sed et nisi in sem convallis accumsan. Morbi id faucibus nisi, ut hendrerit eros. Maecenas facilisis finibus ipsum, quis molestie urna venenatis vehicula. Duis mattis, lorem vel dapibus fringilla, urna felis vestibulum odio, ut finibus diam metus eu nunc. Nulla lobortis orci lorem, vel facilisis nunc ultricies sit amet. Donec est odio, mollis eu dui vel, ullamcorper pulvinar metus. Donec eu faucibus dui. In id volutpat lacus, ac suscipit enim. Nulla placerat pretium eros quis auctor. Aenean at tristique neque, a accumsan tellus. Etiam at metus sed ex fringilla commodo. Vestibulum imperdiet lorem non nulla imperdiet, a molestie dui ultrices.</p>
-
-    <p>Nulla et faucibus neque. Nulla faucibus odio eget felis maximus blandit ac et dolor. Aenean imperdiet, eros euismod fermentum tempus, urna lorem luctus sapien, sed auctor velit leo ac libero. Duis a sapien id lectus eleifend aliquet. Aenean id urna ex. Aenean in elit leo. Fusce nec massa sed mi sodales auctor a sit amet justo.</p>
-
-    <p>Etiam tempus ut arcu vel bibendum. Vestibulum malesuada consequat nunc, at pellentesque velit placerat vitae. Fusce ornare, lacus quis facilisis porta, turpis diam venenatis nibh, consectetur rutrum velit justo ac velit. Vivamus libero nibh, ultrices in lacus ac, finibus finibus mi. Duis lorem diam, interdum vitae risus id, pulvinar pulvinar tortor. Aenean semper est vitae ante malesuada, ac iaculis magna dignissim. Pellentesque non nibh pellentesque, euismod nisi id, faucibus lorem. Nullam ultricies finibus tellus at vestibulum.</p>
-    
-    <p>Cras sed massa sem. Duis congue volutpat elit. Proin molestie, lorem sed volutpat eleifend, massa libero dignissim est, at gravida justo lacus in tortor. Aenean et viverra nisl. Nulla a tincidunt ex. Ut et odio lacus. Nam vitae odio nulla. Proin lobortis risus vel malesuada euismod. Suspendisse faucibus diam quis nisi ultrices luctus. Cras posuere venenatis odio vel fringilla. Donec semper sagittis porttitor. Donec magna est, dictum a tellus quis, congue iaculis justo. Donec eget massa lobortis, elementum mi vel, feugiat mi. Mauris blandit nec leo sit amet lobortis</p>
-</div>
-
-<hr>
-
-<div class="container">
-    <div class="row">
-        <h1>Banana Time will be at {{ banana_time }} today!</h1>
-    </div>
-</div>
-
-<hr>
-
-<div class="container">
-    <div class="col-xs-12">
-        <h1>Scheduled Announcements</h1>
-        <div class="row g-3">
-            <table class="table">
-                <tr>
-                    <th>Time</th>
-                    <th>Message</th>
-                    <th></th>
-                </tr>
-                {% for key in announcements %}
-                    {% if announcements[key].time != None %}
-                        <tr>
-                            <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
-                            <td>{{ announcements[key].text }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td>{{ announcements[key].mins_before }} minutes before {{ announcements[key].banana_time.strftime("%H:%M") }}</td>
-                            <td>{{ announcements[key].text }}</td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-            </table>
+    <title>BananaBot</title>
+</head>
+<body>
+    <div class="flex-container">
+        <div class="w-100 landing-section">
+            <div class="flex-container">
+                <div class="landing-item ">
+                    <h1 class="text-uppercase landing-header">The <span class="text-highlight">Phenomenon</span> Taking the
+                        World By Storm!
+                    </h1>
+                    <p class="landing-text">What started as one man's daily banana has now <b>ripened</b> into a time of <b>fruitful</b> socialisation. Bringing teams closer, promoting good health, and keeping morale high with a well deserved five minute <b>banana break!</b></p>
+                </div>
+                <div class="hero-image landing-item"></div>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <div class="flex-container">
+        <div class="w-100 banana-info">
+            <h2 class="banana-time-logo">Banana Time In</h1>
+                <div class="banana-times">
+                    <h2 class="banana-time-label"><span class="banana-time-number">20</span> HOURS</h1>
+                        <h2 class="banana-time-label"><span class="banana-time-number">54</span> MINUTES</h1>
+                            <h2 class="banana-time-label"><span class="banana-time-number">7</span> SECONDS</h1>
+                </div>
+            <h2 class="banana-actual-time">{{ banana_time }}</h1>
+        </div>
+    </div>
+
+    <div class="flex-container">
+        
+    </div>
+</body>
+</html>

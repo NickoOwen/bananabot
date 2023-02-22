@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 Then run `bananabot.py`
 ```
-python3 src/bananabot.py
+python3 -m uvicorn bananabot:app --reload
 ```
 
 ## Contributing
