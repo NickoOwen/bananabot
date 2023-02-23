@@ -10,6 +10,9 @@
     <link rel="stylesheet" type="text/css" href="static/styles/css/styles.css">
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"> -->
 
+    <!-- Scripts -->
+    <script src="static/js/timer.js"></script>
+
     <title>BananaBot</title>
 </head>
 <body>
@@ -31,16 +34,12 @@
         <div class="w-100 banana-info">
             <h2 class="banana-time-logo">Banana Time In</h1>
                 <div class="banana-times">
-                    <h2 class="banana-time-label"><span class="banana-time-number">20</span> HOURS</h1>
-                        <h2 class="banana-time-label"><span class="banana-time-number">54</span> MINUTES</h1>
-                            <h2 class="banana-time-label"><span class="banana-time-number">7</span> SECONDS</h1>
+                    <h2 class="banana-time-label"><span id="timer-hours" class="banana-time-number">20</span> HOURS</h2>
+                    <h2 class="banana-time-label"><span id="timer-mins" class="banana-time-number">54</span> MINUTES</h2>
+                    <h2 class="banana-time-label"><span id="timer-secs" class="banana-time-number">7</span> SECONDS</h2>
                 </div>
             <h2 class="banana-actual-time">{{ banana_time }}</h1>
         </div>
-    </div>
-
-    <div class="flex-container">
-        
     </div>
 </body>
 </html>

@@ -213,6 +213,9 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+@app.get('/banana-time')
+def get_banana_time():
+    return Announcement.banana_time
 
 @app.get('/announcements')
 def get_announcements():
