@@ -2,32 +2,16 @@ import datetime
 import time
 import random
 import string
-# from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_httpauth import HTTPBasicAuth
-from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
+import bcrypt
 
-from fastapi import FastAPI, status, Request
+from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from announcement import *
-
-#### Authentication ####
-auth = HTTPBasicAuth()
-
-user = 'admin'
-pw = ''.join(random.choice(string.ascii_letters) for i in range(10))
-
-users = {
-    user: generate_password_hash(pw)
-}
-
-@auth.verify_password
-def verify_password(username, password):
-    if username in users:
-        return check_password_hash(users.get(username), password)
-    return False
 
 
 #### Banana Time Variables ####
@@ -207,19 +191,64 @@ def update_selected_days(new_selected_days):
     # Call so any current workers can be updated
     update()
 
-#### API Endpoints ####
+
+#### Authentication ####
+security = HTTPBasic()
+
+username = b"admin"
+password = ""
+salt = bcrypt.gensalt()
+
+def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    # Validate username
+    current_username_bytes = credentials.username.encode("utf8")
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, username
+    )
+
+    # Validate hashed passwords 
+    current_password_bytes = bcrypt.hashpw(credentials.password.encode("utf8"), salt)
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, password
+    )
+
+    # Throw exception if credentials are incorrect
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    
+
+#### FastAPI Setup ####
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+@app.on_event("startup")
+async def startup_event():
+    global password
+
+    # Generate random password and print it, then encode
+    password = ''.join(random.choice(string.ascii_letters) for i in range(10))
+    print(f"Admin Password: { password }")
+
+    # Hash the password and store the hash
+    password = bcrypt.hashpw(password.encode("utf8"), salt)
+
+
+#### API Endpoints ####
 @app.get('/banana-time')
 def get_banana_time():
     return Announcement.banana_time
 
+
 @app.get('/announcements')
 def get_announcements():
     return announcements
+
 
 @app.post('/announcements', status_code=status.HTTP_201_CREATED)
 def add_announcement(announcement: AnnouncementData):
@@ -242,8 +271,9 @@ async def home(request: Request):
         "banana_time": Announcement.banana_time.strftime("%H:%M")
         })
 
+
 @app.get("/admin", response_class=HTMLResponse)
-async def admin(request: Request):
+async def admin(request: Request, dependencies = Depends(get_current_user)):
     return templates.TemplateResponse("admin.html", {
         "request": request,
         "announcements": announcements,

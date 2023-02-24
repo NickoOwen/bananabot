@@ -14,8 +14,6 @@ if (currentDate > countDownDate) {
     countDownDate.setDate(countDownDate.getDate() + 1);
 }
 
-console.log(countDownDate)
-
 // Update the count down every 1 second
 let x = setInterval(function() {
     // Get today's date and time
@@ -28,10 +26,6 @@ let x = setInterval(function() {
     let hours = Math.floor((timeDelta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     let minutes = Math.floor((timeDelta % (1000 * 60 * 60)) / (1000 * 60));
     let seconds = Math.floor((timeDelta % (1000 * 60)) / 1000);
-
-    // console.log("Hours: " + hours);
-    // console.log("Mins: " + minutes);
-    // console.log("Secs: " + seconds);
 
     // Update the respective HTML
     document.getElementById("timer-hours").innerHTML = hours;
