@@ -9,20 +9,23 @@
     <link rel="stylesheet" type="text/css" href="static/styles/bootstrap/css/bootstrap.min.css">
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"> -->
 
-    <title>BananaBot</title>
+    <!-- Scripts -->
+    <script src="static/scripts/jquery/jquery-3.6.3.js"></script>
+    <script src="static/scripts/admin.js"></script>
+
+    <title>Admin</title>
 </head>
 <body>
     <!-- Options -->
     <div class="container">
         <h1>Options</h1>
         <h3>Status</h3>
-        <form class="form-switch form-check" method="POST">
-            <input type="hidden" name="form_id" value="status">
+        <form class="form-switch form-check" method="POST" id="status-form">
             <label class="form-label">Active</label>
             {% if status %}
-                <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()" checked>
+                <input class="form-check-input status-switch" id="status-switch" name="status" type="checkbox" role="switch" checked>
             {% else %}
-                <input class="form-check-input" name="status" type="checkbox" role="switch" onchange="this.form.submit()">
+                <input class="form-check-input status-switch" id="status-switch" name="status" type="checkbox" role="switch">
             {% endif %}
         </form>
 

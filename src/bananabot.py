@@ -171,11 +171,11 @@ def toggle_status():
     if not active:
         active = True
         start()
-        app.logger.info("BananaBot is now ACTIVE")
+        # app.logger.info("BananaBot is now ACTIVE")
     else:
         active = False
         stop()
-        app.logger.info("BananaBot is now INACTIVE")
+        # app.logger.info("BananaBot is now INACTIVE")
     
     return active
 
@@ -240,7 +240,12 @@ async def startup_event():
 
 
 #### API Endpoints ####
-@app.get('/banana-time')
+@app.post('/toggle-status', status_code=status.HTTP_200_OK)
+def update_status(dependencies = Depends(get_current_user)):
+    print("Toggling Status")
+    return toggle_status()
+
+@app.get('/banana-time', status_code=status.HTTP_200_OK)
 def get_banana_time():
     return Announcement.banana_time
 
