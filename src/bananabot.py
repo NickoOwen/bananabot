@@ -4,6 +4,7 @@ import random
 import string
 import secrets
 import bcrypt
+import logging
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
@@ -12,6 +13,10 @@ from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from announcement import *
+
+#### Setup Logger ####
+logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 
 #### Banana Time Variables ####
@@ -42,7 +47,7 @@ def start():
     """Creates all the workers using the data from announcements. Returns True if successful"""
 
     if workers:
-        app.logger.warning("Found running workers when attempting to create workers. Expected 'workers' to be empty")
+        logger.warning("Found running workers when attempting to create workers. Expected 'workers' to be empty")
         return False
 
     for key in announcements:
@@ -64,7 +69,7 @@ def stop():
 
     # Check if the workers dictionary is empty
     if not workers:
-        app.logger.warning("Tried to stop workers when no workers exist")
+        logger.warning("Tried to stop workers when no workers exist")
         return False
 
     for key in workers:
@@ -77,7 +82,7 @@ def update():
     """Terminates and re-creates all workers so they are updated with the latest system changes"""
     
     if active:
-        app.logger.debug("Updating workers...")
+        logger.debug("Updating workers...")
         stop()
         start()
 
@@ -90,10 +95,10 @@ def string_to_time(new_time):
 def set_banana_time(time):
     """Sets banana time"""
 
-    app.logger.debug(f"Requested banana time: {time}")
+    logger.debug(f"Requested banana time: {time}")
     Announcement.banana_time = string_to_time(time)
     announcements['banana_time'].time = Announcement.banana_time    
-    app.logger.info(f"New banana time set at {str(Announcement.banana_time)}")
+    logger.info(f"New banana time set at {str(Announcement.banana_time)}")
 
     # Call update so any running workers can be updated
     update()
@@ -101,7 +106,7 @@ def set_banana_time(time):
 def set_banana_time_text(text):
     """Sets the text for the banana time announcement"""
 
-    app.logger.debug(f"Requested banana time text: {text}")
+    logger.debug(f"Requested banana time text: {text}")
     announcements['banana_time'].text = text
 
     # Call update so any running workers can be updated
@@ -110,12 +115,12 @@ def set_banana_time_text(text):
 def add_time_announcement(time, text):
     """Adds a new announcement with the given time and text"""
 
-    # app.logger.info(f"Adding new announcement for {time} with message: {text}")
+    # logger.info(f"Adding new announcement for {time} with message: {text}")
     new_announcement = Announcement(string_to_time(time), text)
     announcements[new_announcement.id] = new_announcement
 
     if active:
-        # app.logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
+        # logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
         worker = AnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
@@ -125,14 +130,14 @@ def add_time_announcement(time, text):
 def add_mins_before_announcement(mins_before, text):
     """Adds a new announcement for the given 'mins_before' banana time with the given text"""
 
-    app.logger.info(f"Adding new announcement for {mins_before} minutes before banana time with message: {text}")
+    logger.info(f"Adding new announcement for {mins_before} minutes before banana time with message: {text}")
     mins_before = int(mins_before)
 
     new_announcement = MinsBeforeAnnouncement(mins_before, text)
     announcements[new_announcement.id] = new_announcement
 
     if active:
-        app.logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
+        logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
         worker = MinsBeforeAnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
@@ -142,25 +147,25 @@ def add_mins_before_announcement(mins_before, text):
 def instant_message(text):
     """Sends a new message instantly"""
 
-    app.logger.info(f"Sending instant message with message: {text}")
+    logger.info(f"Sending instant message with message: {text}")
     Announcement.send_message(text)
 
 def remove_announcement(id):
     """Removes the announcement with the given id. Returns True if successful"""
 
     if id == 'banana_time':
-        app.logger.warning("Attempted to remove banana_time announcement. This action is not permitted")
+        logger.warning("Attempted to remove banana_time announcement. This action is not permitted")
         return False
 
     id = int(id)
     announcements.pop(id)
 
     if active:
-        app.logger.info(f"Terminating worker with ID {str(id)}")
+        logger.info(f"Terminating worker with ID {str(id)}")
         workers[id].terminate()
         workers.pop(id)
 
-    app.logger.info(f"Announcement with ID {str(id)} has been removed")
+    logger.info(f"Announcement with ID {str(id)} has been removed")
     return True
 
 def toggle_status():
@@ -171,22 +176,22 @@ def toggle_status():
     if not active:
         active = True
         start()
-        # app.logger.info("BananaBot is now ACTIVE")
+        logger.info("BananaBot is now ACTIVE")
     else:
         active = False
         stop()
-        # app.logger.info("BananaBot is now INACTIVE")
+        logger.info("BananaBot is now INACTIVE")
     
     return active
 
 def update_selected_days(new_selected_days):
     """Updates the selected_days with new_selected_days"""
 
-    app.logger.info("Updating selected days")
+    logger.info("Updating selected days")
 
     # Update selected_days
     Announcement.selected_days = new_selected_days
-    app.logger.info(f"Updated days: {str(Announcement.selected_days)}")
+    logger.info(f"Updated days: {str(Announcement.selected_days)}")
     
     # Call so any current workers can be updated
     update()
@@ -242,21 +247,34 @@ async def startup_event():
 #### API Endpoints ####
 @app.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
-    print("Toggling Status")
     return toggle_status()
+
 
 @app.get('/banana-time', status_code=status.HTTP_200_OK)
 def get_banana_time():
     return Announcement.banana_time
 
 
+@app.get('/selected-days', status_code=status.HTTP_200_OK)
+def get_selected_days():
+    return Announcement.selected_days
+
+
+@app.post('/selected-days', status_code=status.HTTP_200_OK)
+def post_selected_days(new_days: dict):
+    logger.info("SELECTED DAYS POST")
+    logger.debug(f"Selected days form: {str(new_days)}")
+    return
+    # update_selected_days(dict((day, request.form.get(day, False) == 'on') for day in Announcement.selected_days))
+
+
 @app.get('/announcements')
-def get_announcements():
+def get_announcements(dependencies = Depends(get_current_user)):
     return announcements
 
 
 @app.post('/announcements', status_code=status.HTTP_201_CREATED)
-def add_announcement(announcement: AnnouncementData):
+def add_announcement(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
     print(announcement.time)
 
     match announcement.type:
