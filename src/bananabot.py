@@ -6,7 +6,9 @@ import secrets
 import bcrypt
 import logging
 
-from fastapi import FastAPI, status, Request, Depends, HTTPException
+from logging.config import fileConfig
+
+from fastapi import FastAPI, status, Request, Depends, HTTPException, Body
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -15,7 +17,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from announcement import *
 
 #### Setup Logger ####
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 
@@ -261,11 +263,12 @@ def get_selected_days():
 
 
 @app.post('/selected-days', status_code=status.HTTP_200_OK)
-def post_selected_days(new_days: dict):
+def post_selected_days(new_days: dict = Body(...)):
     logger.info("SELECTED DAYS POST")
     logger.debug(f"Selected days form: {str(new_days)}")
+    update_selected_days(dict((day, new_days.get(day, False) == "on") for day in Announcement.selected_days))
     return
-    # update_selected_days(dict((day, request.form.get(day, False) == 'on') for day in Announcement.selected_days))
+    
 
 
 @app.get('/announcements')

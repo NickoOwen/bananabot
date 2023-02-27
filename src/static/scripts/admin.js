@@ -26,7 +26,8 @@ $(document).ready(function(){
 
     // AJAX request for updating selected days
     $('.day-selector-checkbox').change(function() {
-        var formData = $('#day-selector-form').serialize();
+        const formElement = document.querySelector('#day-selector-form');
+        const formData = getFormJSON(formElement);
         
         console.log("Form Data:");
         console.log(formData);
@@ -34,8 +35,23 @@ $(document).ready(function(){
         $.ajax({
             type:'POST',
             url:'/selected-days',
-            data: formData,
-            dataType: 'json',
+            data: JSON.stringify(formData),
+            contentType: "application/json; charset=utf-8",
+            traditional: true,
         });
     });
 });
+
+/**
+ * Creates a json object including fields in the form
+ *
+ * @param {HTMLElement} form The form element to convert
+ * @return {Object} The form data
+ */
+const getFormJSON = (form) => {
+    const data = new FormData(form);
+    return Array.from(data.keys()).reduce((result, key) => {
+      result[key] = data.get(key);
+      return result;
+    }, {});
+};
