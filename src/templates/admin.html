@@ -129,7 +129,7 @@
         <!-- Scheduled -->
         <div class="row">
             <h3>Scheduled</h3>
-            <table class="table">
+            <table class="table" id="announcement-table">
                 <tr>
                     <th>Time</th>
                     <th>Message</th>
@@ -138,8 +138,7 @@
                 {% for key in announcements %}
                     {% if announcements[key].time != None %}
                         <tr>
-                            <form method="POST">
-                                <input type="hidden" name="form_id" value="remove_announcement">
+                            <form method="POST" class="remove-announcement-form">
                                 <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
                                 <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
                                 <td>{{ announcements[key].text }}</td>
@@ -155,7 +154,7 @@
                             <form method="POST">
                                 <input type="hidden" name="form_id" value="remove_announcement">
                                 <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                                <td>{{ announcements[key].mins_before }} minutes before {{ announcements[key].banana_time.strftime("%H:%M") }}</td>
+                                <td>{{ announcements[key].mins_before }} minutes before banana time</td>
                                 <td>{{ announcements[key].text }}</td>
                                 <td><button class="btn btn-danger">Remove</button></td>
                             </form>
@@ -172,10 +171,10 @@
             <h3>Add Announcements</h3>
             <div class="row">
                 <h4>Instant Message</h4>
-                <form method="POST" class="row">
-                    <input type="hidden" name="form_id" value="instant_message">
+                <form method="POST" class="row" id="instant-announcement-form">
+                    <input type="hidden" name="type" value="instant">
                     <div class="col">
-                        <input class="form-control" type="text" name="text" required>
+                        <input class="form-control" id="instant-message-input" type="text" name="text" required>
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-primary">Send</button>
@@ -187,15 +186,15 @@
 
             <div class="row">
                 <h4>Time Announcement</h4>
-                <form method="POST" class="row">
-                    <input type="hidden" name="form_id" value="add_announcement">
+                <form method="POST" class="row" id="time-announcement-form">
+                    <input type="hidden" name="type" value="time">
                     <div class="col-sm-auto ">
                         <label for="" class="form-label">Time</label>
-                        <input class="form-control" type="time" name="time">
+                        <input class="form-control" id="time-input" type="time" name="time">
                     </div>
                     <div class="mb-3">
                         <label for="" class="form-label">Announcement Message</label>
-                        <input class="form-control" type="text" name="text" required></textarea>
+                        <input class="form-control" id="time-input-text" type="text" name="text" required></textarea>
                     </div>
                     <div class="mb-3">
                         <button class="btn btn-primary">Add</button>
@@ -205,15 +204,15 @@
 
             <div class="row">
                 <h4>Minutes Before Announcement</h4>
-                <form method="POST" class="row">
-                    <input type="hidden" name="form_id" value="add_mins_before_announcement">
+                <form method="POST" class="row" id="mins-before-announcement-form">
+                    <input type="hidden" name="type" value="mins_before">
                     <div class="col-sm-auto ">
                         <label for="" class="form-label">Minutes Before</label>
-                        <input class="form-control" type="number" name="mins_before" min="1" max="1440" step="1" required>
+                        <input class="form-control" id="mins-before-input" type="number" name="mins_before" min="1" max="1440" step="1" required>
                     </div>
                     <div class="mb-3">
                         <label for="" class="form-label">Announcement Message</label>
-                        <input class="form-control" type="text" name="text" required></textarea>
+                        <input class="form-control" id="mins-before-text-input" type="text" name="text" required>
                     </div>
                     <div class="mb-3">
                         <button class="btn btn-primary">Add</button>

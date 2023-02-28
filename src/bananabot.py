@@ -285,15 +285,18 @@ def get_announcements(dependencies = Depends(get_current_user)):
 
 @app.post('/announcements', status_code=status.HTTP_201_CREATED)
 def add_announcement(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
-    print(announcement.time)
-
     match announcement.type:
         case 'time':
-            add_time_announcement(announcement.time, announcement.text)
+            return announcements[add_time_announcement(announcement.time, announcement.text)]
         case 'mins_before':
-            add_mins_before_announcement(announcement.mins_before, announcement.text)
+            return announcements[add_mins_before_announcement(announcement.mins_before, announcement.text)]
         case 'instant':
             Announcement.send_message(announcement.text)
+
+
+@app.delete('/announcements', status_code=status.HTTP_200_OK)
+def delete_announcement(id: str):
+    remove_announcement(id)
 
 
 #### Web Pages ####

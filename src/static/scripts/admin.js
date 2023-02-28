@@ -88,6 +88,98 @@ $(document).ready(function(){
             }
         });
     });
+
+    // AJAX request for sending an instant message
+    $('#instant-announcement-form').submit(function(e) {
+        e.preventDefault(); // avoid to execute the actual submit of the form
+
+        const formElement = document.querySelector("#instant-announcement-form");
+        const formData = getFormJSON(formElement);
+
+        $.ajax({
+            type:'POST',
+            url:'/announcements',
+            data: JSON.stringify(formData),
+            contentType: "application/json; charset=utf-8",
+            traditional: true,
+
+            // Let the admin know their message was sent and reset the form
+            success: function (data, status, xhr) {
+                document.getElementById("instant-message-input").value = "";
+                alert("Your message was sent");
+            },
+
+            // Create a popup if the server returns an error
+            error: function (jqXhr, textStatus, errorMessage) {
+                alert("Error: Operation failed - Check the logs for more information");
+                location.reload();
+            }
+        });
+    });
+
+    // AJAX request for adding a time announcement
+    $('#time-announcement-form').submit(function(e) {
+        e.preventDefault(); // avoid to execute the actual submit of the form
+
+        const formElement = document.querySelector("#time-announcement-form");
+        const formData = getFormJSON(formElement);
+
+        $.ajax({
+            type:'POST',
+            url:'/announcements',
+            data: JSON.stringify(formData),
+            contentType: "application/json; charset=utf-8",
+            traditional: true,
+
+            // Update the buttons with the latest selected_days
+            success: function (data, status, xhr) {
+                // Update the announcements table
+                addTimeAnnouncement(data.id, data.time, data.text);
+
+                // Reset the form
+                document.getElementById("time-input").value = "";
+                document.getElementById("time-input-text").value = "";
+            },
+
+            // Create a popup if the server returns an error
+            error: function (jqXhr, textStatus, errorMessage) {
+                alert("Error: Operation failed - Check the logs for more information");
+                location.reload();
+            }
+        });
+    });
+
+    // AJAX request for adding a mins_before announcement
+    $('#mins-before-announcement-form').submit(function(e) {
+        e.preventDefault(); // avoid to execute the actual submit of the form
+
+        const formElement = document.querySelector("#mins-before-announcement-form");
+        const formData = getFormJSON(formElement);
+
+        $.ajax({
+            type:'POST',
+            url:'/announcements',
+            data: JSON.stringify(formData),
+            contentType: "application/json; charset=utf-8",
+            traditional: true,
+
+            // Update the buttons with the latest selected_days
+            success: function (data, status, xhr) {
+                // Update the announcements table
+                addMinsBeforeAnnouncement(data.id, data.mins_before, data.text);
+
+                // Reset the form
+                document.getElementById("mins-before-input").value = "";
+                document.getElementById("mins-before-text-input").value = "";
+            },
+
+            // Create a popup if the server returns an error
+            error: function (jqXhr, textStatus, errorMessage) {
+                alert("Error: Operation failed - Check the logs for more information");
+                location.reload();
+            }
+        });
+    });
 });
 
 /**
@@ -103,3 +195,37 @@ const getFormJSON = (form) => {
       return result;
     }, {});
 };
+
+/**
+ * Add a time announcement to the announcements table
+ */
+function addTimeAnnouncement(id, time, text) {
+    // time is in the format HH:MM:SS as a string
+    const splitTime = time.split(":");
+    const formattedTime = splitTime[0]+":"+splitTime[1];
+
+    // Update the table
+    document.getElementById("announcement-table").innerHTML += `<tr> \
+        <form method="POST"> \
+            <input type="hidden" name="announcement_id" value="${id}"> \
+            <td>${formattedTime}</td> \
+            <td>${text}</td> \
+            <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td> \
+        </form> \
+    </tr>`;
+}
+
+/**
+ * Add a mins_before announcement to the announcements table
+ */
+function addMinsBeforeAnnouncement(id, minsBefore, text) {
+    // Update the table
+    document.getElementById("announcement-table").innerHTML += `<tr> \
+        <form method="POST"> \
+            <input type="hidden" name="announcement_id" value="${id}"> \
+            <td>${minsBefore} minutes before banana time</td> \
+            <td>${text}</td> \
+            <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td> \
+        </form> \
+    </tr>`;
+}
