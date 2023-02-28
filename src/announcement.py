@@ -65,11 +65,6 @@ class Announcement:
         # requests.post(Announcement.url, json=json_data, verify=False)
         print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {text}")
 
-class AnnouncementData(BaseModel):
-    type: str
-    time: str = None
-    text: str
-    mins_before: int = None
 
 class AnnouncementWorker(Process):
     """
@@ -131,6 +126,7 @@ class AnnouncementWorker(Process):
             # Sleep until next day warning
             time.sleep(1)
 
+
 class MinsBeforeAnnouncement(Announcement):
     """
     A class used to store the data for a minutes before Announcement. Inherits from Announcement
@@ -162,6 +158,7 @@ class MinsBeforeAnnouncement(Announcement):
         super().__init__(None, text)
         self.mins_before = mins_before
 
+
 class MinsBeforeAnnouncementWorker(AnnouncementWorker):
 
     def __init__(self, announcement: MinsBeforeAnnouncement):
@@ -179,4 +176,56 @@ class MinsBeforeAnnouncementWorker(AnnouncementWorker):
         """Calculates the alert time using the object's data"""
 
         normalised_time = datetime.datetime.combine(datetime.date.today(), self.banana_time)
-        return normalised_time - datetime.timedelta(minutes = self.mins_before) 
+        return normalised_time - datetime.timedelta(minutes = self.mins_before)
+    
+
+#### Data Classes ####
+class AnnouncementData(BaseModel):
+    """
+    A class used for transporting Announcement data between the frontend and backend
+
+    Attributes
+    ----------
+    type : str
+        the type of announcement (time, mins_before, instant)
+    time : str (optional)
+        the time for a time announcement
+    text : str
+        the message for the announcement
+    mins_before : int (optional)
+        the number minutes before for a MinsBeforeAnnouncement
+    """
+    type: str
+    time: str = None
+    text: str
+    mins_before: int = None
+
+
+class SelectedDaysData(BaseModel):
+    """
+    A class used for transporting selected days data between the frontend and backend
+
+    Attributes
+    ----------
+    monday : str
+        the value for monday (on or off)
+    tuesday : str
+        the value for tuesday (on or off)
+    wednesday : str
+        the value for wednesday (on or off)
+    thursday : str
+        the value for thursday (on or off)
+    friday : str
+        the value for friday (on or off)
+    saturday : str
+        the value for saturday (on or off)
+    sunday : str
+        the value for sunday (on or off)
+    """
+    monday: str = None
+    tuesday: str = None
+    wednesday: str = None
+    thursday: str = None
+    friday: str = None
+    saturday: str = None
+    sunday: str = None

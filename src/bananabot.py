@@ -189,7 +189,7 @@ def toggle_status():
 def update_selected_days(new_selected_days):
     """Updates the selected_days with new_selected_days"""
 
-    logger.info("Updating selected days")
+    logger.info(f"Updating selected days with: { new_selected_days }")
 
     # Update selected_days
     Announcement.selected_days = new_selected_days
@@ -258,17 +258,24 @@ def get_banana_time():
 
 
 @app.get('/selected-days', status_code=status.HTTP_200_OK)
-def get_selected_days():
+def get_selected_days(dependencies = Depends(get_current_user)):
     return Announcement.selected_days
 
 
 @app.post('/selected-days', status_code=status.HTTP_200_OK)
-def post_selected_days(new_days: dict = Body(...)):
-    logger.info("SELECTED DAYS POST")
-    logger.debug(f"Selected days form: {str(new_days)}")
-    update_selected_days(dict((day, new_days.get(day, False) == "on") for day in Announcement.selected_days))
-    return
-    
+def post_selected_days(new_days: SelectedDaysData, dependencies = Depends(get_current_user)):
+    new_days = {
+        "monday": new_days.monday == "on",
+        "tuesday": new_days.tuesday == "on",
+        "wednesday": new_days.wednesday == "on",
+        "thursday": new_days.thursday == "on",
+        "friday": new_days.friday == "on",
+        "saturday": new_days.saturday == "on",
+        "sunday": new_days.sunday == "on"
+    }
+
+    update_selected_days(new_days)
+    return Announcement.selected_days
 
 
 @app.get('/announcements')
