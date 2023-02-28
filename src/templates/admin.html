@@ -151,8 +151,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <form method="POST">
-                                <input type="hidden" name="form_id" value="remove_announcement">
+                            <form method="POST" class="remove-announcement-form">
                                 <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
                                 <td>{{ announcements[key].mins_before }} minutes before banana time</td>
                                 <td>{{ announcements[key].text }}</td>

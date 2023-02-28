@@ -131,7 +131,6 @@ $(document).ready(function(){
             contentType: "application/json; charset=utf-8",
             traditional: true,
 
-            // Update the buttons with the latest selected_days
             success: function (data, status, xhr) {
                 // Update the announcements table
                 addTimeAnnouncement(data.id, data.time, data.text);
@@ -163,7 +162,6 @@ $(document).ready(function(){
             contentType: "application/json; charset=utf-8",
             traditional: true,
 
-            // Update the buttons with the latest selected_days
             success: function (data, status, xhr) {
                 // Update the announcements table
                 addMinsBeforeAnnouncement(data.id, data.mins_before, data.text);
@@ -171,6 +169,30 @@ $(document).ready(function(){
                 // Reset the form
                 document.getElementById("mins-before-input").value = "";
                 document.getElementById("mins-before-text-input").value = "";
+            },
+
+            // Create a popup if the server returns an error
+            error: function (jqXhr, textStatus, errorMessage) {
+                alert("Error: Operation failed - Check the logs for more information");
+                location.reload();
+            }
+        });
+    });
+
+    // AJAX request for deleting announcements
+    $('.remove-announcement-form').submit(function(e) {
+        e.preventDefault(); // avoid to execute the actual submit of the form
+
+        const inputs = $(this).serializeArray();
+        const id = inputs[0].value;
+
+        $.ajax({
+            type:'DELETE',
+            url:'/announcements/' + id,
+
+            // Remove the announcement from the table
+            success: function (data, status, xhr) {
+                updateAnnouncementsTable();
             },
 
             // Create a popup if the server returns an error
@@ -198,6 +220,10 @@ const getFormJSON = (form) => {
 
 /**
  * Add a time announcement to the announcements table
+ * 
+ * @param {String} id The id of the announcement
+ * @param {String} time The announcement time in the format HH:MM:SS 
+ * @param {String} text The announcement text
  */
 function addTimeAnnouncement(id, time, text) {
     // time is in the format HH:MM:SS as a string
@@ -217,6 +243,10 @@ function addTimeAnnouncement(id, time, text) {
 
 /**
  * Add a mins_before announcement to the announcements table
+ * 
+ * @param {String} id The id of the announcement
+ * @param {int} minsBefore The number of minutes before banana time the announcement will trigger 
+ * @param {String} text The announcement text
  */
 function addMinsBeforeAnnouncement(id, minsBefore, text) {
     // Update the table
@@ -228,4 +258,68 @@ function addMinsBeforeAnnouncement(id, minsBefore, text) {
             <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td> \
         </form> \
     </tr>`;
+}
+
+function updateAnnouncementsTable() {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "/announcements");
+    xhr.send();
+    xhr.responseType = "json";
+
+    xhr.onload = () => {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            const data = xhr.response;
+            console.log(data);
+            let content = `<tr>
+                                <th>Time</th>
+                                <th>Message</th>
+                                <th></th>
+                            </tr>`
+
+            for(key in data) {
+                let currentAnnouncement = data[key];
+                console.log("Current Announ ID: " + currentAnnouncement.id);
+                
+                // Check what kind of announcement it is
+                if (currentAnnouncement.id == "banana_time") {
+                    content += `<tr>
+                                    <form method="POST" class="remove-announcement-form">
+                                        <input type="hidden" name="announcement_id" value="${currentAnnouncement.id}">
+                                        <td>${formatTime(currentAnnouncement.time)}</td>
+                                        <td>${currentAnnouncement.text}</td>
+                                        <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
+                                    </form>
+                                </tr>`;
+                } else if (currentAnnouncement.time != null) {
+                    content += `<tr>
+                                    <form method="POST" class="remove-announcement-form">
+                                        <input type="hidden" name="announcement_id" value="${currentAnnouncement.id}">
+                                        <td>${formatTime(currentAnnouncement.time)}</td>
+                                        <td>${currentAnnouncement.text}</td>
+                                        <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td>
+                                    </form>
+                                </tr>`;
+                } else {
+                    content += `<tr>
+                                    <form method="POST" class="remove-announcement-form">
+                                        <input type="hidden" name="announcement_id" value="${currentAnnouncement.id}">
+                                        <td>${currentAnnouncement.mins_before} minutes before banana time</td>
+                                        <td>${currentAnnouncement.text}</td>
+                                        <td><button class="btn btn-danger">Remove</button></td>
+                                    </form>
+                                </tr>`;
+                }
+            }
+
+            document.getElementById("announcement-table").innerHTML = content;
+        } else {
+            console.log(`Error: ${xhr.status}`);
+        }
+    };
+}
+
+function formatTime(time) {
+    // time is in the format HH:MM:SS as a string
+    const splitTime = time.split(":");
+    return splitTime[0]+":"+splitTime[1];
 }

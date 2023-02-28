@@ -294,9 +294,9 @@ def add_announcement(announcement: AnnouncementData, dependencies = Depends(get_
             Announcement.send_message(announcement.text)
 
 
-@app.delete('/announcements', status_code=status.HTTP_200_OK)
-def delete_announcement(id: str):
-    remove_announcement(id)
+@app.delete('/announcements/{announcement_id}', status_code=status.HTTP_200_OK)
+def delete_announcement(announcement_id: int):
+    remove_announcement(announcement_id)
 
 
 #### Web Pages ####
