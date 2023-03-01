@@ -178,29 +178,26 @@ $(document).ready(function(){
             }
         });
     });
+});
 
-    // AJAX request for deleting announcements
-    $('.remove-announcement-form').submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form
+// AJAX request for deleting announcements
+$(document).on('click', '.remove-announcement-button', function() {
+    const id = this.id;
 
-        const inputs = $(this).serializeArray();
-        const id = inputs[0].value;
+    $.ajax({
+        type:'DELETE',
+        url:'/announcements/' + id,
 
-        $.ajax({
-            type:'DELETE',
-            url:'/announcements/' + id,
+        // Remove the announcement from the table
+        success: function (data, status, xhr) {
+            document.getElementById("announcement-id-"+id).remove();
+        },
 
-            // Remove the announcement from the table
-            success: function (data, status, xhr) {
-                updateAnnouncementsTable();
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
     });
 });
 
@@ -226,19 +223,13 @@ const getFormJSON = (form) => {
  * @param {String} text The announcement text
  */
 function addTimeAnnouncement(id, time, text) {
-    // time is in the format HH:MM:SS as a string
-    const splitTime = time.split(":");
-    const formattedTime = splitTime[0]+":"+splitTime[1];
-
     // Update the table
-    document.getElementById("announcement-table").innerHTML += `<tr> \
-        <form method="POST"> \
-            <input type="hidden" name="announcement_id" value="${id}"> \
-            <td>${formattedTime}</td> \
-            <td>${text}</td> \
-            <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td> \
-        </form> \
-    </tr>`;
+    $("#announcement-table").append($(`<tr id="announcement-id-${id}"> \
+        <input type="hidden" name="announcement_id" value="${id}"> \
+        <td>${formatTime(time)}</td> \
+        <td>${text}</td> \
+        <td title="Remove announcement"><button id="${id}" class="btn btn-danger remove-announcement-button">Remove</button></td> \
+    </tr>`));
 }
 
 /**
@@ -250,74 +241,19 @@ function addTimeAnnouncement(id, time, text) {
  */
 function addMinsBeforeAnnouncement(id, minsBefore, text) {
     // Update the table
-    document.getElementById("announcement-table").innerHTML += `<tr> \
-        <form method="POST"> \
+    $("#announcement-table").append($(`<tr id="announcement-id-${id}"> \
             <input type="hidden" name="announcement_id" value="${id}"> \
             <td>${minsBefore} minutes before banana time</td> \
             <td>${text}</td> \
-            <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td> \
-        </form> \
-    </tr>`;
+            <td title="Remove announcement"><button id="${id}" class="btn btn-danger remove-announcement-button">Remove</button></td> \
+    </tr>`));
 }
 
-function updateAnnouncementsTable() {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", "/announcements");
-    xhr.send();
-    xhr.responseType = "json";
-
-    xhr.onload = () => {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            const data = xhr.response;
-            console.log(data);
-            let content = `<tr>
-                                <th>Time</th>
-                                <th>Message</th>
-                                <th></th>
-                            </tr>`
-
-            for(key in data) {
-                let currentAnnouncement = data[key];
-                console.log("Current Announ ID: " + currentAnnouncement.id);
-                
-                // Check what kind of announcement it is
-                if (currentAnnouncement.id == "banana_time") {
-                    content += `<tr>
-                                    <form method="POST" class="remove-announcement-form">
-                                        <input type="hidden" name="announcement_id" value="${currentAnnouncement.id}">
-                                        <td>${formatTime(currentAnnouncement.time)}</td>
-                                        <td>${currentAnnouncement.text}</td>
-                                        <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
-                                    </form>
-                                </tr>`;
-                } else if (currentAnnouncement.time != null) {
-                    content += `<tr>
-                                    <form method="POST" class="remove-announcement-form">
-                                        <input type="hidden" name="announcement_id" value="${currentAnnouncement.id}">
-                                        <td>${formatTime(currentAnnouncement.time)}</td>
-                                        <td>${currentAnnouncement.text}</td>
-                                        <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td>
-                                    </form>
-                                </tr>`;
-                } else {
-                    content += `<tr>
-                                    <form method="POST" class="remove-announcement-form">
-                                        <input type="hidden" name="announcement_id" value="${currentAnnouncement.id}">
-                                        <td>${currentAnnouncement.mins_before} minutes before banana time</td>
-                                        <td>${currentAnnouncement.text}</td>
-                                        <td><button class="btn btn-danger">Remove</button></td>
-                                    </form>
-                                </tr>`;
-                }
-            }
-
-            document.getElementById("announcement-table").innerHTML = content;
-        } else {
-            console.log(`Error: ${xhr.status}`);
-        }
-    };
-}
-
+/**
+ * Format a time string from HH:MM:SS to HH:MM
+ * 
+ * @param {String} time The time to be formatted. Must be in the format HH:MM:SS
+ */
 function formatTime(time) {
     // time is in the format HH:MM:SS as a string
     const splitTime = time.split(":");

@@ -137,26 +137,22 @@
                 </tr>
                 {% for key in announcements %}
                     {% if announcements[key].time != None %}
-                        <tr>
-                            <form method="POST" class="remove-announcement-form">
-                                <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                                <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
-                                <td>{{ announcements[key].text }}</td>
-                                {% if announcements[key].id != 'banana_time' %}
-                                    <td title="Remove announcement"><button class="btn btn-danger">Remove</button></td>
-                                {% else %}
-                                    <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
-                                {% endif %}
-                            </form>
+                        <tr id="announcement-id-{{ announcements[key].id }}" class="remove-announcement-form">
+                            <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
+                            <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
+                            <td>{{ announcements[key].text }}</td>
+                            {% if announcements[key].id != 'banana_time' %}
+                                <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
+                            {% else %}
+                                <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
+                            {% endif %}
                         </tr>
                     {% else %}
-                        <tr>
-                            <form method="POST" class="remove-announcement-form">
-                                <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                                <td>{{ announcements[key].mins_before }} minutes before banana time</td>
-                                <td>{{ announcements[key].text }}</td>
-                                <td><button class="btn btn-danger">Remove</button></td>
-                            </form>
+                        <tr id="announcement-id-{{ announcements[key].id }}">
+                            <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
+                            <td>{{ announcements[key].mins_before }} minutes before banana time</td>
+                            <td>{{ announcements[key].text }}</td>
+                            <td><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
                         </tr>
                     {% endif %}
                 {% endfor %}
