@@ -201,6 +201,62 @@ $(document).on('click', '.remove-announcement-button', function() {
     });
 });
 
+// AJAX request for setting banana time
+$(document).on('submit', '#banana-time-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#banana-time-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/banana-time',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Update the form with the new time
+        success: function (data, status, xhr) {
+            document.getElementById("banana-time-input").value = formatTime(data);
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+
+// AJAX request for setting the banana time text
+$(document).on('submit', '#banana-time-text-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#banana-time-text-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/banana-text',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Update the form with the new text
+        success: function (data, status, xhr) {
+            document.getElementById("banana-time-text-input").value = data;
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+
 /**
  * Creates a json object including fields in the form
  *

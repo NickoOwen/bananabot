@@ -33,10 +33,12 @@ let x = setInterval(function() {
     document.getElementById("timer-secs").innerHTML = seconds;
 
     // Do something once the countdown has finished
-    // if (timeDelta < 0) {
-    //   clearInterval(x);
-    //   document.getElementById("demo").innerHTML = "EXPIRED";
-    // }
-
-    // TODO Either reset the timer or do some cool animation if a user is viewing the timer during banana time
+    if (timeDelta <= 0) {
+        // TODO Something more exciting than this
+        document.getElementById("banana-time-timer").innerHTML = "<h2>BANANA TIME!</h2>";
+        clearInterval(x);
+        // alert("BANANA TIME!");
+        // Sleep?
+        // location.reload();
+    }
 }, 1000);

@@ -229,3 +229,8 @@ class SelectedDaysData(BaseModel):
     friday: str = None
     saturday: str = None
     sunday: str = None
+
+
+class BananaTimeData(BaseModel):
+    time: str = None
+    text: str = None

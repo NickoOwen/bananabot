@@ -108,7 +108,7 @@ def set_banana_time(time):
 def set_banana_time_text(text):
     """Sets the text for the banana time announcement"""
 
-    logger.debug(f"Requested banana time text: {text}")
+    logger.info(f"Requested banana time text: {text}")
     announcements['banana_time'].text = text
 
     # Call update so any running workers can be updated
@@ -257,6 +257,18 @@ def get_banana_time():
     return Announcement.banana_time
 
 
+@app.post('/banana-time', status_code=status.HTTP_200_OK)
+def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(get_current_user)):
+    set_banana_time(banana_time_data.time)
+    return Announcement.banana_time
+
+
+@app.post('/banana-text', status_code=status.HTTP_200_OK)
+def post_banana_text(banana_time_data: BananaTimeData, dependencies = Depends(get_current_user)):
+    set_banana_time_text(banana_time_data.text)
+    return announcements['banana_time'].text
+
+
 @app.get('/selected-days', status_code=status.HTTP_200_OK)
 def get_selected_days(dependencies = Depends(get_current_user)):
     return Announcement.selected_days
@@ -292,10 +304,13 @@ def add_announcement(announcement: AnnouncementData, dependencies = Depends(get_
             return announcements[add_mins_before_announcement(announcement.mins_before, announcement.text)]
         case 'instant':
             Announcement.send_message(announcement.text)
+            return
+        
+    # Raise exception if none of the above conditions were satisfied
 
 
 @app.delete('/announcements/{announcement_id}', status_code=status.HTTP_200_OK)
-def delete_announcement(announcement_id: int):
+def delete_announcement(announcement_id: int, dependencies = Depends(get_current_user)):
     remove_announcement(announcement_id)
 
 
