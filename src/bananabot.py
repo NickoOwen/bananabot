@@ -300,7 +300,7 @@ def get_announcements(dependencies = Depends(get_current_user)):
 
 
 @app.post('/announcements', status_code=status.HTTP_201_CREATED)
-def add_announcement(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
+def post_announcements(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
     match announcement.type:
         case 'time':
             return announcements[add_time_announcement(announcement.time, announcement.text)]
