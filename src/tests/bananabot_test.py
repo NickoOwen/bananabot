@@ -126,6 +126,7 @@ class TestApiEndpoints:
         assert response.status_code == 200
         assert response.json() == "15:30:00"
 
+
     def test_post_banana_time(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
         Announcement.banana_time = datetime.time(15, 30, 0)
@@ -139,6 +140,7 @@ class TestApiEndpoints:
         assert response.status_code == 200
         assert response.json() == "17:30:00"
         app.dependency_overrides = {}
+
 
     def test_post_banana_text(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
@@ -154,12 +156,14 @@ class TestApiEndpoints:
         assert response.json() == "test post banana text"
         app.dependency_overrides = {}
 
+
     def test_get_selected_days(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
         response = client.get("/selected-days")
         assert response.status_code == 200
         assert response.json() == Announcement.selected_days
         app.dependency_overrides = {}
+
 
     def test_post_selected_days(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
@@ -200,11 +204,13 @@ class TestApiEndpoints:
         assert response.json() == expected
         app.dependency_overrides = {}
 
+
     def test_get_announcements(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
         response = client.get("/announcements")
         assert response.status_code == 200
         app.dependency_overrides = {}
+
 
     def test_post_time_announcement(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
@@ -222,6 +228,7 @@ class TestApiEndpoints:
         assert response.status_code == 201
         app.dependency_overrides = {}
 
+
     def test_post_mins_before_announcement(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
 
@@ -237,6 +244,7 @@ class TestApiEndpoints:
 
         assert response.status_code == 201
         app.dependency_overrides = {}
+
 
     def test_post_instant_announcement(self, mocker):
         # Mock send_message function
@@ -255,6 +263,7 @@ class TestApiEndpoints:
         assert response.status_code == 201
         app.dependency_overrides = {}
 
+
     def test_delete_announcement(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
 
@@ -266,15 +275,24 @@ class TestApiEndpoints:
         assert id not in announcements
         app.dependency_overrides = {}
 
-    
-    # def test_home_route(self):
-    #     response = app.test_client().get('/')
-    #     assert response.status_code == 200
 
-    # def test_admin_route(self):
-    #     response = app.test_client().get('/admin')
-    #     assert response.status_code == 401 # Unauthorised
+    def test_home(self):
+        response = client.get("/")
+        assert response.status_code == 200
 
-    # def test_unknown_route(self):
-    #     response = app.test_client().get('/unknown-route')
-    #     assert response.status_code == 404 # Not Found
+
+    def test_admin(self):
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+        response = client.get("/admin")
+        assert response.status_code == 200
+        app.dependency_overrides = {}
+
+
+    def test_admin_unauthorised(self):
+        response = client.get('/admin')
+        assert response.status_code == 401 # Unauthorised
+
+
+    def test_unknown_endpoint(self):
+        response = client.get('/unknown-route')
+        assert response.status_code == 404 # Not Found

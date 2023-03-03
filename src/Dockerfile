@@ -16,11 +16,11 @@ RUN pip install \
     email-validator==1.3.1 \
     exceptiongroup==1.1.0 \
     fastapi==0.92.0 \
-    h11==0.14.0
+    h11==0.14.0 \
     httpcore==0.16.3 \
     httptools==0.5.0 \
     httpx==0.23.3 \
-    idna==3.4
+    idna==3.4 \
     iniconfig==2.0.0 \
     itsdangerous==2.1.2 \
     Jinja2==3.1.2 \
@@ -31,7 +31,7 @@ RUN pip install \
     pydantic==1.10.5 \
     python-dotenv==1.0.0 \
     python-multipart==0.0.6 \
-    PyYAML==6.0
+    PyYAML==6.0 \
     requests==2.28.2 \
     rfc3986==1.5.0 \
     sniffio==1.3.0 \
@@ -52,4 +52,4 @@ COPY static /home/bananabot/static/
 ENV TZ=Australia/Sydney
 
 EXPOSE 8000
-CMD [ "python3", "/home/bananabot/bananabot.py" ]
+CMD [ "python3", "-m", "uvicorn", "bananabot:app" ]
