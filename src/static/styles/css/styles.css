@@ -121,6 +121,12 @@
     text-align: center;
 }
 
+.banana-time-announcement {
+    font-size: 72px;
+    font-weight: 900;
+    text-align: center;
+}
+
 .banana-time-number {
     font-size: 60px;
     line-height: 50px;
