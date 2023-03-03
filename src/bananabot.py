@@ -158,6 +158,10 @@ def remove_announcement(id):
     if id == 'banana_time':
         logger.warning("Attempted to remove banana_time announcement. This action is not permitted")
         return False
+    
+    if id not in announcements:
+        logger.warning("Attempted to remove a non-existent announcement")
+        return
 
     id = int(id)
     announcements.pop(id)
