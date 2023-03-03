@@ -57,12 +57,19 @@ class Announcement:
 
     @staticmethod
     def send_message(text):
+        """
+        Parameters
+        ----------
+        text : str
+            The message that will be sent
+        """
+
         json_data = {
             'text': text
         }
 
         # POST Request to send message
-        # requests.post(Announcement.url, json=json_data, verify=False)
+        requests.post(Announcement.url, json=json_data, verify=False)
         print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {text}")
 
 
@@ -232,5 +239,15 @@ class SelectedDaysData(BaseModel):
 
 
 class BananaTimeData(BaseModel):
+    """
+    A class used for transporting banana time data
+
+    Attributes
+    ----------
+    time : str (optional)
+        the time for banana time
+    text : str (optional)
+        the message for banana time
+    """
     time: str = None
     text: str = None

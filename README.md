@@ -43,7 +43,7 @@ To run BananaBot using Python, first install the required dependencies
 pip install -r requirements.txt
 ```
 
-Then run `bananabot.py`
+Then run from within the `src` directory
 ```
 python3 -m uvicorn bananabot:app --reload
 ```

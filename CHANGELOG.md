@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 #### Added
+- The ability to store state to enable persistence across container / app reboots
+
+## [4.0.0] - 2023-03-XX
+
+#### Added
+- Switched from Flask to use FastAPI as the framework was better suited for BananaBot
 - AJAX requests to make the UI experience smoother, more robust, and eliminate the need to refresh the page when a change is made
 - New UI design that removes the filler content and looks better in general
-- The ability to send a message instantly from the admin UI
-- The ability to store state to enable persistence across container / app reboots
 
 ## [3.3.0] - 2023-02-15
 
