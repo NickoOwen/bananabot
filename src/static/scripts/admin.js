@@ -1,6 +1,6 @@
 $(document).ready(function(){
     // AJAX request for the toggle status switch
-    $('.status-switch').change(function() {
+    $('#status-switch').change(function() {
         $.ajax({
             type:'POST',
             url:'/toggle-status',

@@ -23,9 +23,9 @@
         <form class="form-switch form-check" method="POST" id="status-form">
             <label class="form-label">Active</label>
             {% if status %}
-                <input class="form-check-input status-switch" id="status-switch" name="status" type="checkbox" role="switch" checked>
+                <input class="form-check-input" id="status-switch" name="status" type="checkbox" role="switch" checked>
             {% else %}
-                <input class="form-check-input status-switch" id="status-switch" name="status" type="checkbox" role="switch">
+                <input class="form-check-input" id="status-switch" name="status" type="checkbox" role="switch">
             {% endif %}
         </form>
 
@@ -150,7 +150,7 @@
                             <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
                             <td>{{ announcements[key].mins_before }} minutes before banana time</td>
                             <td>{{ announcements[key].text }}</td>
-                            <td><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
+                            <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
                         </tr>
                     {% endif %}
                 {% endfor %}

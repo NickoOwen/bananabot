@@ -27,7 +27,7 @@ workers = {}        # Stores the workers
 active = False      # Stores the current status of the system (i.e. whether bananabot needs to send requests)
 
 # Create the banana time announcement
-banana_time_announcement = Announcement(datetime.time(15, 30, 0), "# @HERE Banana Time!")
+banana_time_announcement = Announcement(datetime.time(15, 30, 0), "@HERE Banana Time!")
 banana_time_announcement.id = "banana_time"
 
 # Create the default announcements
@@ -117,12 +117,12 @@ def set_banana_time_text(text):
 def add_time_announcement(time, text):
     """Adds a new announcement with the given time and text"""
 
-    # logger.info(f"Adding new announcement for {time} with message: {text}")
+    logger.info(f"Adding new announcement for {time} with message: {text}")
     new_announcement = Announcement(string_to_time(time), text)
     announcements[new_announcement.id] = new_announcement
 
     if active:
-        # logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
+        logger.debug(f"Creating worker for new announcement with ID {new_announcement.id}")
         worker = AnnouncementWorker(new_announcement)
         workers[worker.id] = worker
         workers[worker.id].start()
@@ -161,7 +161,7 @@ def remove_announcement(id):
     
     if id not in announcements:
         logger.warning("Attempted to remove a non-existent announcement")
-        return
+        return False
 
     id = int(id)
     announcements.pop(id)
@@ -310,12 +310,21 @@ def post_announcements(announcement: AnnouncementData, dependencies = Depends(ge
             Announcement.send_message(announcement.text)
             return
         
-    # Raise exception if none of the above conditions were satisfied
+    # Raise exception if the type is unknown
+    raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unrecognised announcement type"
+        )
 
 
 @app.delete('/announcements/{announcement_id}', status_code=status.HTTP_200_OK)
 def delete_announcement(announcement_id: int, dependencies = Depends(get_current_user)):
-    remove_announcement(announcement_id)
+    if(remove_announcement(announcement_id) == False):
+        # Raise exception if the type is unknown
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not remove announcement"
+            )
 
 
 #### Web Pages ####

@@ -58,6 +58,8 @@ class Announcement:
     @staticmethod
     def send_message(text):
         """
+        Sends the provided text using a POST request
+
         Parameters
         ----------
         text : str

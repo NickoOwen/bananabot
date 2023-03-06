@@ -15,9 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - Switched from Flask to use FastAPI as the framework was better suited for BananaBot
 - Implemented AJAX requests to make the UI experience smoother, more robust, and eliminate the need to refresh the page when a change is made
-- Added a new home page UI design that removes the filler content and looks better in general
-- Added a countdown timer on the home page that counts down to banana time
+- Added a new and improved home page UI designed by [@BasilDimopoulos](https://github.com/BasilDimopoulos) which features a timer that counts down to banana time
 - Improved security by storing the hashed and salted password
+- Added the MIT license
 
 ## [3.3.0] - 2023-02-15
 

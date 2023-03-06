@@ -13,7 +13,7 @@ class TestDefaultConfig:
         assert "banana_time" in announcements
         assert Announcement.banana_time == datetime.time(15, 30, 0)
         assert announcements["banana_time"].time == datetime.time(15, 30, 0)
-        assert announcements["banana_time"].text == "# @HERE Banana Time!"
+        assert announcements["banana_time"].text == "@HERE Banana Time!"
 
     def test_default_active_value(self):
         assert active == False
@@ -271,6 +271,23 @@ class TestApiEndpoints:
         app.dependency_overrides = {}
 
 
+    def test_post_unknown_type_announcement(self):
+        # Mock send_message function
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+
+        response = client.post(
+            "/announcements",
+            headers={},
+            json={
+                "type": "unknown",
+                "text": "test"
+            },
+        )
+
+        assert response.status_code == 400
+        app.dependency_overrides = {}
+
+
     def test_delete_announcement(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
 
@@ -280,6 +297,14 @@ class TestApiEndpoints:
         response = client.delete(f"/announcements/{id}")
         assert response.status_code == 200
         assert id not in announcements
+        app.dependency_overrides = {}
+
+    
+    def test_delete_non_existent_announcement(self):
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+        assert 9999 not in announcements
+        response = client.delete(f"/announcements/{9999}")
+        assert response.status_code == 400
         app.dependency_overrides = {}
 
 
