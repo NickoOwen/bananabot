@@ -5,7 +5,6 @@ import string
 import secrets
 import bcrypt
 import logging
-
 from logging.config import fileConfig
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException, Body
@@ -156,7 +155,7 @@ def remove_announcement(id):
     """Removes the announcement with the given id. Returns True if successful"""
 
     if id == 'banana_time':
-        logger.warning("Attempted to remove banana_time announcement. This action is not permitted")
+        logger.warning("Attempted to remove the banana time announcement. This action is not permitted")
         return False
     
     if id not in announcements:
@@ -197,7 +196,7 @@ def update_selected_days(new_selected_days):
 
     # Update selected_days
     Announcement.selected_days = new_selected_days
-    logger.info(f"Updated days: {str(Announcement.selected_days)}")
+    logger.debug(f"Updated days: {str(Announcement.selected_days)}")
     
     # Call so any current workers can be updated
     update()
@@ -263,12 +262,26 @@ def get_banana_time():
 
 @app.post('/banana-time', status_code=status.HTTP_200_OK)
 def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(get_current_user)):
+    # Check that time is set
+    if(banana_time_data.time == None):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Unrecognised announcement type"
+        )
+    
     set_banana_time(banana_time_data.time)
     return Announcement.banana_time
 
 
 @app.post('/banana-text', status_code=status.HTTP_200_OK)
 def post_banana_text(banana_time_data: BananaTimeData, dependencies = Depends(get_current_user)):
+    # Check that text is set
+    if(banana_time_data.text == None):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Unrecognised announcement type"
+        )
+
     set_banana_time_text(banana_time_data.text)
     return announcements['banana_time'].text
 

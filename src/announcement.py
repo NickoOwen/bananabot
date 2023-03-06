@@ -2,8 +2,14 @@ import datetime
 import time
 import requests
 import itertools
+import logging
 from multiprocessing import Process
 from pydantic import BaseModel
+from logging.config import fileConfig
+
+#### Setup Logger ####
+fileConfig('logging.conf', disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 class Announcement:
     """
@@ -71,8 +77,8 @@ class Announcement:
         }
 
         # POST Request to send message
+        logger.info(f"Sending request with message: {text}")
         requests.post(Announcement.url, json=json_data, verify=False)
-        print(f"[{str(datetime.datetime.now())}] INFO - Request sent with message: {text}")
 
 
 class AnnouncementWorker(Process):
@@ -123,12 +129,12 @@ class AnnouncementWorker(Process):
             
             sleep_time = alert_time - current_time
             sleep_time_seconds = sleep_time.seconds
-            print(f"[{str(datetime.datetime.now())}] DEBUG - Announcement with ID {str(self.id)} is sleeping for {str(sleep_time_seconds)} seconds")
+            logger.debug(f"Announcement with ID {str(self.id)} is sleeping for {str(sleep_time_seconds)} seconds")
             time.sleep(sleep_time_seconds + 1) # Offset by 1 second
 
             # POST Request to send message
             current_day = datetime.datetime.now().strftime('%A').lower()
-            print(f"[{str(datetime.datetime.now())}] DEBUG - Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
+            logger.debug(f"Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
             if self.selected_days[current_day]:
                 Announcement.send_message(self.text)
 

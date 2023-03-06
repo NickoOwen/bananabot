@@ -149,6 +149,19 @@ class TestApiEndpoints:
         app.dependency_overrides = {}
 
 
+    def test_post_banana_time_without_time(self):
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+
+        response = client.post(
+            "/banana-time",
+            headers={},
+            json={"text": "Testing without the time"},
+        )
+
+        assert response.status_code == 422
+        app.dependency_overrides = {}
+
+
     def test_post_banana_text(self):
         app.dependency_overrides[get_current_user] = mock_get_current_user
         announcements['banana_time'].text = "Test"
@@ -161,6 +174,19 @@ class TestApiEndpoints:
 
         assert response.status_code == 200
         assert response.json() == "test post banana text"
+        app.dependency_overrides = {}
+
+    
+    def test_post_banana_text_without_text(self):
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+
+        response = client.post(
+            "/banana-text",
+            headers={},
+            json={"time": "15:30:00"},
+        )
+
+        assert response.status_code == 422
         app.dependency_overrides = {}
 
 
