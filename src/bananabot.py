@@ -232,7 +232,7 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     
 
 #### FastAPI Setup ####
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -338,6 +338,11 @@ def delete_announcement(announcement_id: int, dependencies = Depends(get_current
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Could not remove announcement"
             )
+    
+
+@app.get('/healthcheck', status_code=status.HTTP_200_OK)
+async def get_healthcheck():
+    return {"status": "healthy"}
 
 
 #### Web Pages ####
