@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - The ability to store state to enable persistence across container / app reboots
 
-## [4.0.0] - 2023-03-XX
+## [4.0.0] - 2023-03-09
 
 #### Added
 - Switched from Flask to use FastAPI as the framework was better suited for BananaBot
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a new and improved home page UI designed by [@BasilDimopoulos](https://github.com/BasilDimopoulos) which features a timer that counts down to banana time
 - Improved security by storing the hashed and salted password
 - Added the MIT license
+- Switched the `AnnouncementWorker` class to inherit from `Thread` instead of `Process` due to issues relating to [this GitHub issue](https://github.com/tiangolo/fastapi/issues/1487)
 
 ## [3.3.0] - 2023-02-15
 

@@ -8,7 +8,7 @@ import logging
 from logging.config import fileConfig
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException, Body
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -261,6 +261,10 @@ def startup_event():
 
 
 #### API Endpoints ####
+@app.get("/favicon.ico", status_code=status.HTTP_200_OK)
+async def get_favicon():
+    return FileResponse("static/images/bb-transparent.png")
+
 @app.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
     return toggle_status()

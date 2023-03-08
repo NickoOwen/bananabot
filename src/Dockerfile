@@ -16,7 +16,6 @@ RUN pip install \
     fastapi==0.92.0 \
     h11==0.14.0 \
     httpcore==0.16.3 \
-    # httpx==0.23.3 \
     idna==3.4 \
     iniconfig==2.0.0 \
     Jinja2==3.1.2 \
@@ -24,8 +23,6 @@ RUN pip install \
     packaging==23.0 \
     pluggy==1.0.0 \
     pydantic==1.10.5 \
-    # pytest==7.2.2 \
-    # pytest-mock==3.10.0 \
     requests==2.28.2 \
     rfc3986==1.5.0 \
     sniffio==1.3.0 \
@@ -46,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f localhost:8000/healthcheck 
 
 EXPOSE 8000
-CMD [ "python3", "-m", "uvicorn", "bananabot:app", "--proxy-headers", "--host", "0.0.0.0" ]
+CMD [ "python3", "-m", "uvicorn", "bananabot:app", "--host", "0.0.0.0", "--port", "8000"]
