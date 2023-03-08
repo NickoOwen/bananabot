@@ -109,6 +109,16 @@ def mock_get_current_user():
     return
 
 class TestApiEndpoints:
+    def test_get_favicon(self):
+        response = client.get("/favicon.ico")
+        assert response.status_code == 200
+
+
+    def test_get_profile_picture(self):
+        response = client.get("/profile-picture")
+        assert response.status_code == 200
+
+
     def test_toggle_status(self, mocker):
         # Mock functions
         mocker.patch('bananabot.start', return_value=True)

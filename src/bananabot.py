@@ -265,10 +265,15 @@ def startup_event():
 async def get_favicon():
     return FileResponse("static/images/bb-transparent.png")
 
+
+@app.get("/profile-picture", status_code=status.HTTP_200_OK)
+async def get_profile_picture():
+    return FileResponse("static/images/bb-white-background.png")
+
+
 @app.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
     return toggle_status()
-    # TODO check the return value of toggle status and raise HTTPException if False
 
 
 @app.get('/banana-time', status_code=status.HTTP_200_OK)
