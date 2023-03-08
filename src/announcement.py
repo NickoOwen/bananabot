@@ -1,9 +1,8 @@
 import datetime
-import time
 import requests
 import itertools
 import logging
-from multiprocessing import Process
+import threading
 from pydantic import BaseModel
 from logging.config import fileConfig
 
@@ -81,12 +80,14 @@ class Announcement:
         requests.post(Announcement.url, json=json_data, verify=False)
 
 
-class AnnouncementWorker(Process):
+class AnnouncementWorker(threading.Thread):
     """
-    A class that inherits Process and is used to send the announcements. Makes use of multiprocessing to run standalone and sleep until the right time
+    A class that inherits Thread and is used to send the announcements. Makes use of threading to run standalone and sleep until it needs to send a message
 
     Attributes
     ----------
+    stop_event : threading.Event
+        a threading Event used to shutdown the worker when they are removed
     id : int
         the announcement's id
     time : datetime.time
@@ -107,22 +108,25 @@ class AnnouncementWorker(Process):
             takes an Announcement as a parameter and creates the worker using the Announcement data
         """
 
-        super(AnnouncementWorker, self).__init__()
+        threading.Thread.__init__(self)
+        self.stop_event = threading.Event()
         self.id = announcement.id
         self.time = announcement.time
         self.text = announcement.text
         self.banana_time = Announcement.banana_time
         self.selected_days = Announcement.selected_days
 
+
     def calculate_alert_time(self):
         """Calculates the alert time using the object's data"""
-
         return datetime.datetime.combine(datetime.date.today(), self.time)
 
+
     def run(self):
-        """Inherited from Process. Is the function that runs continuously until terminated"""
+        """This function runs continuously until the Thread is terminated"""
 
         while True:
+            # Calculate the number of seconds until the announcement needs to send the message
             current_time = datetime.datetime.now()
             
             alert_time = self.calculate_alert_time()
@@ -130,16 +134,24 @@ class AnnouncementWorker(Process):
             sleep_time = alert_time - current_time
             sleep_time_seconds = sleep_time.seconds
             logger.debug(f"Announcement with ID {str(self.id)} is sleeping for {str(sleep_time_seconds)} seconds")
-            time.sleep(sleep_time_seconds + 1) # Offset by 1 second
+            self.stop_event.wait(sleep_time_seconds + 1) # Offset by 1 second
 
-            # POST Request to send message
+            # Break the loop if the threads have been ordered to stop
+            if self.stop_event.is_set():
+                logger.debug(f"Announcement {str(self.id)} stopping...")
+                break
+
+            # Check the current day and send message if required
             current_day = datetime.datetime.now().strftime('%A').lower()
             logger.debug(f"Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
             if self.selected_days[current_day]:
                 Announcement.send_message(self.text)
 
             # Sleep until next day warning
-            time.sleep(1)
+            self.stop_event.wait(1)
+            if self.stop_event.is_set():
+                logger.debug(f"Announcement {str(self.id)} stopping...")
+                break
 
 
 class MinsBeforeAnnouncement(Announcement):

@@ -63,8 +63,9 @@ def start():
 
     return True
 
+
 def stop():
-    """Terminates all running workers. Returns True if successful"""
+    """Stop all running workers. Returns True if successful"""
 
     global workers
 
@@ -74,24 +75,27 @@ def stop():
         return False
 
     for key in workers:
-        workers[key].terminate()
+        workers[key].stop_event.set()
     
     workers = {}
     return True
 
+
 def update():
-    """Terminates and re-creates all workers so they are updated with the latest system changes"""
+    """Stops and re-creates all workers so they are updated with the latest system changes"""
     
     if active:
         logger.debug("Updating workers...")
         stop()
         start()
 
+
 def string_to_time(new_time):
     """Takes a string as input and returns a datetime.time object"""
 
     t = time.strptime(new_time, "%H:%M")
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
+
 
 def set_banana_time(time):
     """Sets banana time"""
@@ -104,6 +108,7 @@ def set_banana_time(time):
     # Call update so any running workers can be updated
     update()
 
+
 def set_banana_time_text(text):
     """Sets the text for the banana time announcement"""
 
@@ -113,6 +118,7 @@ def set_banana_time_text(text):
     # Call update so any running workers can be updated
     update()
         
+
 def add_time_announcement(time, text):
     """Adds a new announcement with the given time and text"""
 
@@ -127,6 +133,7 @@ def add_time_announcement(time, text):
         workers[worker.id].start()
 
     return new_announcement.id
+
 
 def add_mins_before_announcement(mins_before, text):
     """Adds a new announcement for the given 'mins_before' banana time with the given text"""
@@ -145,11 +152,13 @@ def add_mins_before_announcement(mins_before, text):
 
     return new_announcement.id
 
+
 def instant_message(text):
     """Sends a new message instantly"""
 
     logger.info(f"Sending instant message with message: {text}")
     Announcement.send_message(text)
+
 
 def remove_announcement(id):
     """Removes the announcement with the given id. Returns True if successful"""
@@ -167,11 +176,12 @@ def remove_announcement(id):
 
     if active:
         logger.info(f"Terminating worker with ID {str(id)}")
-        workers[id].terminate()
+        workers[id].stop_event.set()
         workers.pop(id)
 
     logger.info(f"Announcement with ID {str(id)} has been removed")
     return True
+
 
 def toggle_status():
     """Toggles the status of the system (active). Returns the new value of active"""
@@ -188,6 +198,7 @@ def toggle_status():
         logger.info("BananaBot is now INACTIVE")
     
     return active
+
 
 def update_selected_days(new_selected_days):
     """Updates the selected_days with new_selected_days"""
@@ -238,7 +249,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.on_event("startup")
-async def startup_event():
+def startup_event():
     global password
 
     # Generate random password and print it, then encode
@@ -253,6 +264,7 @@ async def startup_event():
 @app.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
     return toggle_status()
+    # TODO check the return value of toggle status and raise HTTPException if False
 
 
 @app.get('/banana-time', status_code=status.HTTP_200_OK)
