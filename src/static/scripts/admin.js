@@ -232,6 +232,21 @@ $(document).ready(function(){
             }
         });
     });
+
+    $('.sidebar-option').click(function(e) {
+        // Extract which sidebar option was clicked
+        const clickedSidebarOption = $(this).attr('id');
+        console.log(clickedSidebarOption);
+
+        // Update the main-content and change sidebar option highlight
+        switch(clickedSidebarOption) {
+            case "sidebar-options":
+                console.log("Clicked sidebar options");
+                showOptions();
+                break;
+
+        }
+    });
 });
 
 // AJAX request for deleting announcements
@@ -313,4 +328,118 @@ function formatTime(time) {
     // time is in the format HH:MM:SS as a string
     const splitTime = time.split(":");
     return splitTime[0]+":"+splitTime[1];
+}
+
+/**
+ * Update the main-content div to show the Options
+ */
+function showOptions() {
+    const mainContent = document.getElementById("main-content");
+
+    // Create element (div with class container)
+
+    // Add the content
+    mainContent.innerHTML = `
+        <div class="container">
+            <br>
+            <h3>Status</h3>
+            <p><i>Toggles BananaBot on and off (dictates whether it will send messages)</i></p>
+            <form class="form-switch form-check" method="POST" id="status-form">
+                <label class="form-label">Active</label>
+                <input class="form-check-input" id="status-switch" name="status" type="checkbox" role="switch" checked>
+            </form>
+
+            <hr>
+
+            <h3>Day Selector</h3>
+            <p><i>Choose which days BananaBot will send messages</i></p>
+            <div class="row">
+                <form method="POST" id="day-selector-form">
+                    <div class="btn-group">
+                        <input type="checkbox" name="monday" class="btn-check day-selector-checkbox" id="monday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="monday-checkbox">Monday</label>
+
+                        <input type="checkbox" name="tuesday" class="btn-check day-selector-checkbox" id="tuesday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="tuesday-checkbox">Tuesday</label>
+
+                        <input type="checkbox" name="wednesday" class="btn-check day-selector-checkbox" id="wednesday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="wednesday-checkbox">Wednesday</label>
+
+                        <input type="checkbox" name="thursday" class="btn-check day-selector-checkbox" id="thursday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="thursday-checkbox">Thursday</label>
+
+                        <input type="checkbox" name="friday" class="btn-check day-selector-checkbox" id="friday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="friday-checkbox">Friday</label>
+
+                        <input type="checkbox" name="saturday" class="btn-check day-selector-checkbox" id="saturday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="saturday-checkbox">Saturday</label>
+
+                        <input type="checkbox" name="sunday" class="btn-check day-selector-checkbox" id="sunday-checkbox" checked>
+                        <label class="btn btn-outline-primary" for="sunday-checkbox">Sunday</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    // Set attributes accordingly
+    $.ajax({
+        type:'GET',
+        url:'/selected-days',
+        // contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Update the buttons with the latest selected_days
+        success: function (data, status, xhr) {
+            if(data['monday']) {
+                document.getElementById('monday-checkbox').setAttribute("checked", "");
+            } else if(data['monday'] == false) {
+                document.getElementById('monday-checkbox').removeAttribute("checked");
+            }
+
+            if(data['tuesday']) {
+                document.getElementById('tuesday-checkbox').setAttribute("checked", "");
+            } else if(data['tuesday'] == false) {
+                document.getElementById('tuesday-checkbox').removeAttribute("checked");
+            }
+
+            if(data['wednesday']) {
+                document.getElementById('wednesday-checkbox').setAttribute("checked", "");
+            } else if(data['wednesday'] == false) {
+                document.getElementById('wednesday-checkbox').removeAttribute("checked");
+            }
+
+            if(data['thursday']) {
+                document.getElementById('thursday-checkbox').setAttribute("checked", "");
+            } else if(data['thursday'] == false) {
+                document.getElementById('thursday-checkbox').removeAttribute("checked");
+            }
+
+            if(data['friday']) {
+                document.getElementById('friday-checkbox').setAttribute("checked", "");
+            } else if(data['friday'] == false) {
+                document.getElementById('friday-checkbox').removeAttribute("checked");
+            }
+
+            if(data['saturday']) {
+                document.getElementById('saturday-checkbox').setAttribute("checked", "");
+            } else if(data['saturday'] == false) {
+                document.getElementById('saturday-checkbox').removeAttribute("checked");
+            }
+
+            if(data['sunday']) {
+                document.getElementById('sunday-checkbox').setAttribute("checked", "");
+            } else if(data['sunday'] == false) {
+                document.getElementById('sunday-checkbox').removeAttribute("checked");
+            }
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    })
+
+    // Update main-content div
 }
