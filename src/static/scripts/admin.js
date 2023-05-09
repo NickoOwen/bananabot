@@ -236,16 +236,19 @@ $(document).ready(function(){
     $('.sidebar-option').click(function(e) {
         // Extract which sidebar option was clicked
         const clickedSidebarOption = $(this).attr('id');
-        console.log(clickedSidebarOption);
+
+        // Update the sidebar
+        setSidebarSelected(clickedSidebarOption);
+
+        // Set main content div to loading
+        document.getElementById("main-content").innerHTML = "Loading...";
 
         // Update the main-content and change sidebar option highlight
         switch(clickedSidebarOption) {
             case "sidebar-options":
-                console.log("Clicked sidebar options");
                 showOptions();
                 break;
             case "sidebar-banana-time":
-                console.log("Clicked sidebar banana time");
                 showBananaTimeOptions();
                 break;
         }
@@ -326,6 +329,7 @@ function addMinsBeforeAnnouncement(id, minsBefore, text) {
  * Format a time string from HH:MM:SS to HH:MM
  * 
  * @param {String} time The time to be formatted. Must be in the format HH:MM:SS
+ * @return {String} Returns a time string formatted as "HH:MM"
  */
 function formatTime(time) {
     // time is in the format HH:MM:SS as a string
@@ -336,20 +340,25 @@ function formatTime(time) {
 /**
  * Update the main-content div to show the Options
  */
-function showOptions() {
-    const mainContent = document.getElementById("main-content");
+async function showOptions() {
+    // Create the new content div
+    let content = document.createElement("div");
 
-    // Create element (div with class container)
+    // Get the status
+    const status = await getStatus();
+
+    // Get the selected days
+    const selectedDays = await getSelectedDays();
 
     // Add the content
-    mainContent.innerHTML = `
+    content.innerHTML = `
         <div class="container">
             <br>
             <h3>Status</h3>
             <p><i>Toggles BananaBot on and off (dictates whether it will send messages)</i></p>
             <form class="form-switch form-check" method="POST" id="status-form">
                 <label class="form-label">Active</label>
-                <input class="form-check-input" id="status-switch" name="status" type="checkbox" role="switch" checked>
+                <input class="form-check-input" id="status-switch" name="status" type="checkbox" role="switch" ${status ? 'checked' : ''}>
             </form>
 
             <hr>
@@ -359,25 +368,25 @@ function showOptions() {
             <div class="row">
                 <form method="POST" id="day-selector-form">
                     <div class="btn-group">
-                        <input type="checkbox" name="monday" class="btn-check day-selector-checkbox" id="monday-checkbox" checked>
+                        <input type="checkbox" name="monday" class="btn-check day-selector-checkbox" id="monday-checkbox" ${selectedDays.monday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="monday-checkbox">Monday</label>
 
-                        <input type="checkbox" name="tuesday" class="btn-check day-selector-checkbox" id="tuesday-checkbox" checked>
+                        <input type="checkbox" name="tuesday" class="btn-check day-selector-checkbox" id="tuesday-checkbox" ${selectedDays.tuesday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="tuesday-checkbox">Tuesday</label>
 
-                        <input type="checkbox" name="wednesday" class="btn-check day-selector-checkbox" id="wednesday-checkbox" checked>
+                        <input type="checkbox" name="wednesday" class="btn-check day-selector-checkbox" id="wednesday-checkbox" ${selectedDays.wednesday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="wednesday-checkbox">Wednesday</label>
 
-                        <input type="checkbox" name="thursday" class="btn-check day-selector-checkbox" id="thursday-checkbox" checked>
+                        <input type="checkbox" name="thursday" class="btn-check day-selector-checkbox" id="thursday-checkbox" ${selectedDays.thursday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="thursday-checkbox">Thursday</label>
 
-                        <input type="checkbox" name="friday" class="btn-check day-selector-checkbox" id="friday-checkbox" checked>
+                        <input type="checkbox" name="friday" class="btn-check day-selector-checkbox" id="friday-checkbox" ${selectedDays.friday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="friday-checkbox">Friday</label>
 
-                        <input type="checkbox" name="saturday" class="btn-check day-selector-checkbox" id="saturday-checkbox" checked>
+                        <input type="checkbox" name="saturday" class="btn-check day-selector-checkbox" id="saturday-checkbox" ${selectedDays.saturday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="saturday-checkbox">Saturday</label>
 
-                        <input type="checkbox" name="sunday" class="btn-check day-selector-checkbox" id="sunday-checkbox" checked>
+                        <input type="checkbox" name="sunday" class="btn-check day-selector-checkbox" id="sunday-checkbox" ${selectedDays.sunday ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="sunday-checkbox">Sunday</label>
                     </div>
                 </form>
@@ -385,67 +394,37 @@ function showOptions() {
         </div>
     `;
 
-    // Set attributes accordingly
-    $.ajax({
-        type:'GET',
-        url:'/selected-days',
-        // contentType: "application/json; charset=utf-8",
-        traditional: true,
-
-        // Update the buttons with the latest selected_days
-        success: function (data, status, xhr) {
-            if(data['monday']) {
-                document.getElementById('monday-checkbox').setAttribute("checked", "");
-            } else if(data['monday'] == false) {
-                document.getElementById('monday-checkbox').removeAttribute("checked");
-            }
-
-            if(data['tuesday']) {
-                document.getElementById('tuesday-checkbox').setAttribute("checked", "");
-            } else if(data['tuesday'] == false) {
-                document.getElementById('tuesday-checkbox').removeAttribute("checked");
-            }
-
-            if(data['wednesday']) {
-                document.getElementById('wednesday-checkbox').setAttribute("checked", "");
-            } else if(data['wednesday'] == false) {
-                document.getElementById('wednesday-checkbox').removeAttribute("checked");
-            }
-
-            if(data['thursday']) {
-                document.getElementById('thursday-checkbox').setAttribute("checked", "");
-            } else if(data['thursday'] == false) {
-                document.getElementById('thursday-checkbox').removeAttribute("checked");
-            }
-
-            if(data['friday']) {
-                document.getElementById('friday-checkbox').setAttribute("checked", "");
-            } else if(data['friday'] == false) {
-                document.getElementById('friday-checkbox').removeAttribute("checked");
-            }
-
-            if(data['saturday']) {
-                document.getElementById('saturday-checkbox').setAttribute("checked", "");
-            } else if(data['saturday'] == false) {
-                document.getElementById('saturday-checkbox').removeAttribute("checked");
-            }
-
-            if(data['sunday']) {
-                document.getElementById('sunday-checkbox').setAttribute("checked", "");
-            } else if(data['sunday'] == false) {
-                document.getElementById('sunday-checkbox').removeAttribute("checked");
-            }
-        },
-
-        // Create a popup if the server returns an error
-        error: function (jqXhr, textStatus, errorMessage) {
-            alert("Error: Operation failed - Check the logs for more information");
-            location.reload();
-        }
-    })
-
-    // Update main-content div
+    // Get the main content div and update it with the new content
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = '';
+    mainContent.appendChild(content);
 }
+
+
+/**
+ * Gets the current status of BananaBot
+ * @return {Boolean} Returns true or false depending on the status of BananaBot
+ */
+async function getStatus() {
+    // Fetch the current status
+    const response = await fetch('/status');
+    const status = await response.json();
+
+    return status;
+}
+
+
+/**
+ * Gets the selected days from BananaBot
+ * @return {Object} Returns an array of the selected days
+ */
+async function getSelectedDays() {
+    const response = await fetch('/selected-days');
+    const selectedDays = await response.json();
+
+    return selectedDays;
+}
+
 
 /**
  * Update the main-content div to show the Banana Time Options
@@ -494,7 +473,24 @@ async function showBananaTimeOptions() {
 }
 
 /**
+ * Sets what is selected on the sidebar
+ * 
+ * @param {String} selected The ID of the sidebar option to be selected
+ */
+function setSidebarSelected(selected) {
+    // Deselect all
+    document.getElementById("sidebar-options").classList.remove('active');
+    document.getElementById("sidebar-banana-time").classList.remove('active');
+    document.getElementById("sidebar-announcements").classList.remove('active');
+    document.getElementById("sidebar-add-announcements").classList.remove('active');
+
+    // Select the requested element
+    document.getElementById(selected).classList.add('active');
+}
+
+/**
  * Get Banana Time from the server
+ * @return {String} Banana Time in the format "HH:MM"
  */
 async function getBananaTime() {
     const response = await fetch('/banana-time');
@@ -504,11 +500,11 @@ async function getBananaTime() {
 
 /**
  * Get Banana Text from the server
+ * @return {String} The Banana Time text as a string
  */
 async function getBananaText() {
     const response = await fetch('/banana-text');
     const text = await response.json();
-    console.log("Mesage: ", text);
     return text;
 }
 

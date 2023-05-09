@@ -271,6 +271,11 @@ async def get_profile_picture():
     return FileResponse("static/images/bb-white-background.png")
 
 
+@app.get('/status', status_code=status.HTTP_200_OK)
+def get_status(dependencies = Depends(get_current_user)):
+    return active
+
+
 @app.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
     return toggle_status()
