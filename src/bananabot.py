@@ -294,6 +294,11 @@ def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(ge
     return Announcement.banana_time
 
 
+@app.get('/banana-text', status_code=status.HTTP_200_OK)
+def get_banana_text():
+    return announcements["banana_time"].text
+
+
 @app.post('/banana-text', status_code=status.HTTP_200_OK)
 def post_banana_text(banana_time_data: BananaTimeData, dependencies = Depends(get_current_user)):
     # Check that text is set

@@ -244,7 +244,10 @@ $(document).ready(function(){
                 console.log("Clicked sidebar options");
                 showOptions();
                 break;
-
+            case "sidebar-banana-time":
+                console.log("Clicked sidebar banana time");
+                showBananaTimeOptions();
+                break;
         }
     });
 });
@@ -442,4 +445,73 @@ function showOptions() {
     })
 
     // Update main-content div
+}
+
+/**
+ * Update the main-content div to show the Banana Time Options
+ */
+async function showBananaTimeOptions() {
+    // Create the new content div
+    let content = document.createElement("div");
+    content.classList.add("container");
+
+    // Get Banana Time
+    const bananaTime = await getBananaTime();
+
+    // Get Banana Message
+    const bananaMessage = await getBananaText();
+
+    // Set new HTML content
+    content.innerHTML = `
+        <br>
+        <form class="row" method="POST" id="banana-time-form">
+            <h3 for="" class="form-label">Banana Time</h3>
+            <p><i>Sets Banana Time (Note: Any minutes before announcements are based on this time)</i></p>
+            <div class="col-auto">
+                <input id="banana-time-input" class="form-control" type="time" name="time" value="${bananaTime}">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary">Set</button>
+            </div>
+        </form>
+        <hr>
+        <form class="row" method="POST" id="banana-time-text-form">
+            <h3 for="" class="form-label">Message</h3>
+            <p><i>Sets the message BananaBot will send at Banana Time</i></p>
+            <div class="col">
+                <input id="banana-time-text-input" class="form-control" type="text" name="text" value="${bananaMessage}" required></input>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary">Set</button>
+            </div>
+        </form>
+    `;
+
+    // Get the main content div and update it with the new content
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = '';
+    mainContent.appendChild(content);
+}
+
+/**
+ * Get Banana Time from the server
+ */
+async function getBananaTime() {
+    const response = await fetch('/banana-time');
+    const timeString = await response.json();
+    return formatTime(timeString);
+}
+
+/**
+ * Get Banana Text from the server
+ */
+async function getBananaText() {
+    const response = await fetch('/banana-text');
+    const text = await response.json();
+    console.log("Mesage: ", text);
+    return text;
+}
+
+function showAnnouncements() {
+
 }
