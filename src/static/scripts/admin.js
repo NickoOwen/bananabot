@@ -251,6 +251,12 @@ $(document).ready(function(){
             case "sidebar-banana-time":
                 showBananaTimeOptions();
                 break;
+            case "sidebar-announcements":
+                showAnnouncements();
+                break;
+            case "sidebar-add-announcements":
+                showAddAnnouncements();
+                break;
         }
     });
 });
@@ -508,6 +514,128 @@ async function getBananaText() {
     return text;
 }
 
-function showAnnouncements() {
+/**
+ * Update the main-content div to show the Announcements
+ */
+async function showAnnouncements() {
+    // Create the new content div
+    let content = document.createElement("div");
+    content.classList.add("container");
 
+    // Get current announcements
+    // const announcements = ;
+
+    // Set new HTML content
+    // TODO fix this so it generates the table properly
+    content.innerHTML = `
+        <br>
+        <h3>Scheduled</h3>
+        <table class="table" id="announcement-table">
+            <tr>
+                <th>Time</th>
+                <th>Message</th>
+                <th></th>
+            </tr>
+            {% for key in announcements %}
+                {% if announcements[key].time != None %}
+                    <tr id="announcement-id-{{ announcements[key].id }}" class="remove-announcement-form">
+                        <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
+                        <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
+                        <td>{{ announcements[key].text }}</td>
+                        {% if announcements[key].id != 'banana_time' %}
+                            <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
+                        {% else %}
+                            <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr id="announcement-id-{{ announcements[key].id }}">
+                        <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
+                        <td>{{ announcements[key].mins_before }} minutes before banana time</td>
+                        <td>{{ announcements[key].text }}</td>
+                        <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    `;
+
+    // Get the main content div and update it with the new content
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = '';
+    mainContent.appendChild(content);
+}
+
+/**
+ * Update the main-content div to show the add announcements forms
+ */
+async function showAddAnnouncements() {
+    // Create the new content div
+    let content = document.createElement("div");
+    content.classList.add("container");
+
+    // Set new HTML content
+    content.innerHTML = `
+        <br>
+        <div class="row">
+            <h3>Instant Message</h3>
+            <p><i>Instantly send a message as BananaBot</i></p>
+            <form method="POST" class="row" id="instant-announcement-form">
+                <input type="hidden" name="type" value="instant">
+                <div class="col">
+                    <input class="form-control" id="instant-message-input" type="text" name="text" required>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary">Send</button>
+                </div>
+            </form>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <h3>Time Announcement</h3>
+            <p><i>Add a time announcement that will send a message at a set time</i></p>
+            <form method="POST" class="row" id="time-announcement-form">
+                <input type="hidden" name="type" value="time">
+                <div class="col-sm-auto ">
+                    <label for="" class="form-label">Time</label>
+                    <input class="form-control" id="time-input" type="time" name="time">
+                </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Announcement Message</label>
+                    <input class="form-control" id="time-input-text" type="text" name="text" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <h3>Minutes Before Announcement</h3>
+            <p><i>Add a minutes before announcement that will send a message X minutes before Banana Time (Note: The time the message is sent will change depending on Banana Time)</i></p>
+            <form method="POST" class="row" id="mins-before-announcement-form">
+                <input type="hidden" name="type" value="mins_before">
+                <div class="col-sm-auto ">
+                    <label for="" class="form-label">Minutes Before</label>
+                    <input class="form-control" id="mins-before-input" type="number" name="mins_before" min="1" max="1440" step="1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Announcement Message</label>
+                    <input class="form-control" id="mins-before-text-input" type="text" name="text" required>
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Get the main content div and update it with the new content
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = '';
+    mainContent.appendChild(content);
 }

@@ -50,8 +50,9 @@
         <div class="offset-sm-2 col" id="main-content">
             <!-- Options -->
             <div class="container">
-                <h1>Options</h1>
+                <br>
                 <h3>Status</h3>
+                <p><i>Toggles BananaBot on and off (dictates whether it will send messages)</i></p>
                 <form class="form-switch form-check" method="POST" id="status-form">
                     <label class="form-label">Active</label>
                     {% if status %}
@@ -61,7 +62,10 @@
                     {% endif %}
                 </form>
 
+                <hr>
+
                 <h3>Day Selector</h3>
+                <p><i>Choose which days BananaBot will send messages</i></p>
                 <div class="row">
                     <form method="POST" id="day-selector-form">
                         <div class="btn-group">
@@ -118,133 +122,6 @@
                 </div>
 
                 <br>
-            </div>
-
-            <!-- Banana Time -->
-            <div class="container">
-                <h1>Banana Time</h1>
-                <div class="row">
-                    <div class="row g-3">
-                        <form class="row" method="POST" id="banana-time-form">
-                            <h3 for="" class="form-label">Time</h3>
-                            <div class="col-auto">
-                                <input id="banana-time-input" class="form-control" type="time" name="time" value="{{ announcements['banana_time'].time.strftime('%H:%M') }}">
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-primary">Set</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <form class="row" method="POST" id="banana-time-text-form">
-                        <h3 for="" class="form-label">Message</h3>
-                        <div class="col">
-                            <input id="banana-time-text-input" class="form-control" type="text" name="text" value="{{ announcements['banana_time'].text }}" required></input>
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-primary">Set</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <br>
-            
-            <!-- Announcements -->
-            <div class="container">
-                <h1>Announcements</h1>
-
-                <!-- Scheduled -->
-                <div class="row">
-                    <h3>Scheduled</h3>
-                    <table class="table" id="announcement-table">
-                        <tr>
-                            <th>Time</th>
-                            <th>Message</th>
-                            <th></th>
-                        </tr>
-                        {% for key in announcements %}
-                            {% if announcements[key].time != None %}
-                                <tr id="announcement-id-{{ announcements[key].id }}" class="remove-announcement-form">
-                                    <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                                    <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
-                                    <td>{{ announcements[key].text }}</td>
-                                    {% if announcements[key].id != 'banana_time' %}
-                                        <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
-                                    {% else %}
-                                        <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
-                                    {% endif %}
-                                </tr>
-                            {% else %}
-                                <tr id="announcement-id-{{ announcements[key].id }}">
-                                    <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                                    <td>{{ announcements[key].mins_before }} minutes before banana time</td>
-                                    <td>{{ announcements[key].text }}</td>
-                                    <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
-                                </tr>
-                            {% endif %}
-                        {% endfor %}
-                    </table>
-                </div>
-
-                <br>
-
-                <!-- Add Announcements -->
-                <div class="row">
-                    <h3>Add Announcements</h3>
-                    <div class="row">
-                        <h4>Instant Message</h4>
-                        <form method="POST" class="row" id="instant-announcement-form">
-                            <input type="hidden" name="type" value="instant">
-                            <div class="col">
-                                <input class="form-control" id="instant-message-input" type="text" name="text" required>
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-primary">Send</button>
-                            </div>
-                        </form>
-                        <br>
-                        <br>
-                    </div>
-
-                    <div class="row">
-                        <h4>Time Announcement</h4>
-                        <form method="POST" class="row" id="time-announcement-form">
-                            <input type="hidden" name="type" value="time">
-                            <div class="col-sm-auto ">
-                                <label for="" class="form-label">Time</label>
-                                <input class="form-control" id="time-input" type="time" name="time">
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Announcement Message</label>
-                                <input class="form-control" id="time-input-text" type="text" name="text" required></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <button class="btn btn-primary">Add</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="row">
-                        <h4>Minutes Before Announcement</h4>
-                        <form method="POST" class="row" id="mins-before-announcement-form">
-                            <input type="hidden" name="type" value="mins_before">
-                            <div class="col-sm-auto ">
-                                <label for="" class="form-label">Minutes Before</label>
-                                <input class="form-control" id="mins-before-input" type="number" name="mins_before" min="1" max="1440" step="1" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Announcement Message</label>
-                                <input class="form-control" id="mins-before-text-input" type="text" name="text" required>
-                            </div>
-                            <div class="mb-3">
-                                <button class="btn btn-primary">Add</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
