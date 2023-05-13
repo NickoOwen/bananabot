@@ -389,7 +389,6 @@ async def home(request: Request):
 async def admin(request: Request, dependencies = Depends(get_current_user)):
     return templates.TemplateResponse("admin.html", {
         "request": request,
-        "announcements": announcements,
         "status": active,
         "selected_days": Announcement.selected_days
     })

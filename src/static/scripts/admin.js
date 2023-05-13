@@ -1,238 +1,4 @@
 $(document).ready(function(){
-    // AJAX request for the toggle status switch
-    $('#status-switch').change(function() {
-        $.ajax({
-            type:'POST',
-            url:'/toggle-status',
-
-            // Check the updated status value
-            success: function (data, status, xhr) {
-                if (data == true) {
-                    document.getElementById('status-switch').setAttribute("checked", "");
-                    alert("BananaBot is now ACTIVE");
-                } else if (data == false) {
-                    document.getElementById('status-switch').removeAttribute("checked");
-                    alert("BananaBot is now INACTIVE");
-                }
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
-    // AJAX request for updating selected days
-    $('.day-selector-checkbox').change(function() {
-        const formElement = document.querySelector('#day-selector-form');
-        const formData = getFormJSON(formElement);
-
-        $.ajax({
-            type:'POST',
-            url:'/selected-days',
-            data: JSON.stringify(formData),
-            contentType: "application/json; charset=utf-8",
-            traditional: true,
-
-            // Update the buttons with the latest selected_days
-            success: function (data, status, xhr) {
-                if(data['monday']) {
-                    document.getElementById('monday-checkbox').setAttribute("checked", "");
-                } else if(data['monday'] == false) {
-                    document.getElementById('monday-checkbox').removeAttribute("checked");
-                }
-
-                if(data['tuesday']) {
-                    document.getElementById('tuesday-checkbox').setAttribute("checked", "");
-                } else if(data['tuesday'] == false) {
-                    document.getElementById('tuesday-checkbox').removeAttribute("checked");
-                }
-
-                if(data['wednesday']) {
-                    document.getElementById('wednesday-checkbox').setAttribute("checked", "");
-                } else if(data['wednesday'] == false) {
-                    document.getElementById('wednesday-checkbox').removeAttribute("checked");
-                }
-
-                if(data['thursday']) {
-                    document.getElementById('thursday-checkbox').setAttribute("checked", "");
-                } else if(data['thursday'] == false) {
-                    document.getElementById('thursday-checkbox').removeAttribute("checked");
-                }
-
-                if(data['friday']) {
-                    document.getElementById('friday-checkbox').setAttribute("checked", "");
-                } else if(data['friday'] == false) {
-                    document.getElementById('friday-checkbox').removeAttribute("checked");
-                }
-
-                if(data['saturday']) {
-                    document.getElementById('saturday-checkbox').setAttribute("checked", "");
-                } else if(data['saturday'] == false) {
-                    document.getElementById('saturday-checkbox').removeAttribute("checked");
-                }
-
-                if(data['sunday']) {
-                    document.getElementById('sunday-checkbox').setAttribute("checked", "");
-                } else if(data['sunday'] == false) {
-                    document.getElementById('sunday-checkbox').removeAttribute("checked");
-                }
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
-    // AJAX request for sending an instant message
-    $('#instant-announcement-form').submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form
-
-        const formElement = document.querySelector("#instant-announcement-form");
-        const formData = getFormJSON(formElement);
-
-        $.ajax({
-            type:'POST',
-            url:'/announcements',
-            data: JSON.stringify(formData),
-            contentType: "application/json; charset=utf-8",
-            traditional: true,
-
-            // Let the admin know their message was sent and reset the form
-            success: function (data, status, xhr) {
-                document.getElementById("instant-message-input").value = "";
-                alert("Your message was sent");
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
-    // AJAX request for adding a time announcement
-    $('#time-announcement-form').submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form
-
-        const formElement = document.querySelector("#time-announcement-form");
-        const formData = getFormJSON(formElement);
-
-        $.ajax({
-            type:'POST',
-            url:'/announcements',
-            data: JSON.stringify(formData),
-            contentType: "application/json; charset=utf-8",
-            traditional: true,
-
-            success: function (data, status, xhr) {
-                // Update the announcements table
-                addTimeAnnouncement(data.id, data.time, data.text);
-
-                // Reset the form
-                document.getElementById("time-input").value = "";
-                document.getElementById("time-input-text").value = "";
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
-    // AJAX request for adding a mins_before announcement
-    $('#mins-before-announcement-form').submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form
-
-        const formElement = document.querySelector("#mins-before-announcement-form");
-        const formData = getFormJSON(formElement);
-
-        $.ajax({
-            type:'POST',
-            url:'/announcements',
-            data: JSON.stringify(formData),
-            contentType: "application/json; charset=utf-8",
-            traditional: true,
-
-            success: function (data, status, xhr) {
-                // Update the announcements table
-                addMinsBeforeAnnouncement(data.id, data.mins_before, data.text);
-
-                // Reset the form
-                document.getElementById("mins-before-input").value = "";
-                document.getElementById("mins-before-text-input").value = "";
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
-    // AJAX request for setting banana time
-    $('#banana-time-form').submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form
-
-        const formElement = document.querySelector("#banana-time-form");
-        const formData = getFormJSON(formElement);
-
-        $.ajax({
-            type:'POST',
-            url:'/banana-time',
-            data: JSON.stringify(formData),
-            contentType: "application/json; charset=utf-8",
-            traditional: true,
-
-            // Update the form with the new time
-            success: function (data, status, xhr) {
-                document.getElementById("banana-time-input").value = formatTime(data);
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
-    // AJAX request for setting the banana time text
-    $('#banana-time-text-form').submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form
-
-        const formElement = document.querySelector("#banana-time-text-form");
-        const formData = getFormJSON(formElement);
-
-        $.ajax({
-            type:'POST',
-            url:'/banana-text',
-            data: JSON.stringify(formData),
-            contentType: "application/json; charset=utf-8",
-            traditional: true,
-
-            // Update the form with the new text
-            success: function (data, status, xhr) {
-                document.getElementById("banana-time-text-input").value = data;
-            },
-
-            // Create a popup if the server returns an error
-            error: function (jqXhr, textStatus, errorMessage) {
-                alert("Error: Operation failed - Check the logs for more information");
-                location.reload();
-            }
-        });
-    });
-
     $('.sidebar-option').click(function(e) {
         // Extract which sidebar option was clicked
         const clickedSidebarOption = $(this).attr('id');
@@ -257,6 +23,206 @@ $(document).ready(function(){
             case "sidebar-add-announcements":
                 showAddAnnouncements();
                 break;
+        }
+    });
+});
+
+// AJAX request for the toggle status switch
+$(document).on('change', '#status-switch', function() {
+    $.ajax({
+        type:'POST',
+        url:'/toggle-status',
+
+        // Check the updated status value
+        success: function (data, status, xhr) {
+            if (data == true) {
+                document.getElementById('status-switch').setAttribute("checked", "");
+                alert("Success: BananaBot is now ACTIVE");
+            } else if (data == false) {
+                document.getElementById('status-switch').removeAttribute("checked");
+                alert("Success: BananaBot is now INACTIVE");
+            }
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+// AJAX request for updating selected days
+$(document).on('change', '.day-selector-checkbox', function() {
+    const formElement = document.querySelector('#day-selector-form');
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/selected-days',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Update the buttons with the latest selected_days
+        success: function (data, status, xhr) {
+            daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+            daysOfWeek.forEach(day => {
+                if (data[day]) {
+                    document.getElementById(`${day}-checkbox`).setAttribute('checked', '');
+                } else {
+                    document.getElementById(`${day}-checkbox`).removeAttribute('checked');
+                }
+            });
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+// AJAX request for sending an instant message
+$(document).on('submit', '#instant-announcement-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#instant-announcement-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/announcements',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Let the admin know their message was sent and reset the form
+        success: function (data, status, xhr) {
+            document.getElementById("instant-message-input").value = "";
+            alert("Success: Your message was sent");
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+// AJAX request for adding a time announcement
+$(document).on('submit', '#time-announcement-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#time-announcement-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/announcements',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        success: function (data, status, xhr) {
+            // Reset the form and alert user
+            document.getElementById("time-input").value = "";
+            document.getElementById("time-input-text").value = "";
+            alert("Success: New announcement added");
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+// AJAX request for adding a mins_before announcement
+$(document).on('submit', '#mins-before-announcement-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#mins-before-announcement-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/announcements',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        success: function (data, status, xhr) {
+            // Reset the form and alert the user
+            document.getElementById("mins-before-input").value = "";
+            document.getElementById("mins-before-text-input").value = "";
+            alert("Success: New announcement added");
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+// AJAX request for setting banana time
+$(document).on('submit', '#banana-time-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#banana-time-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/banana-time',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Update the form with the new time
+        success: function (data, status, xhr) {
+            document.getElementById("banana-time-input").value = formatTime(data);
+            alert("Success: Banana Time is now " + formatTime(data));
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
+        }
+    });
+});
+
+// AJAX request for setting the banana time text
+$(document).on('submit', '#banana-time-text-form', function(e) {
+    e.preventDefault(); // avoid to execute the actual submit of the form
+
+    const formElement = document.querySelector("#banana-time-text-form");
+    const formData = getFormJSON(formElement);
+
+    $.ajax({
+        type:'POST',
+        url:'/banana-text',
+        data: JSON.stringify(formData),
+        contentType: "application/json; charset=utf-8",
+        traditional: true,
+
+        // Update the form with the new text
+        success: function (data, status, xhr) {
+            document.getElementById("banana-time-text-input").value = data;
+            alert("Success: New Banana Time message set");
+        },
+
+        // Create a popup if the server returns an error
+        error: function (jqXhr, textStatus, errorMessage) {
+            alert("Error: Operation failed - Check the logs for more information");
+            location.reload();
         }
     });
 });
@@ -296,40 +262,6 @@ const getFormJSON = (form) => {
       return result;
     }, {});
 };
-
-/**
- * Add a time announcement to the announcements table
- * 
- * @param {String} id The id of the announcement
- * @param {String} time The announcement time in the format HH:MM:SS 
- * @param {String} text The announcement text
- */
-function addTimeAnnouncement(id, time, text) {
-    // Update the table
-    $("#announcement-table").append($(`<tr id="announcement-id-${id}"> \
-        <input type="hidden" name="announcement_id" value="${id}"> \
-        <td>${formatTime(time)}</td> \
-        <td>${text}</td> \
-        <td title="Remove announcement"><button id="${id}" class="btn btn-danger remove-announcement-button">Remove</button></td> \
-    </tr>`));
-}
-
-/**
- * Add a mins_before announcement to the announcements table
- * 
- * @param {String} id The id of the announcement
- * @param {int} minsBefore The number of minutes before banana time the announcement will trigger 
- * @param {String} text The announcement text
- */
-function addMinsBeforeAnnouncement(id, minsBefore, text) {
-    // Update the table
-    $("#announcement-table").append($(`<tr id="announcement-id-${id}"> \
-            <input type="hidden" name="announcement_id" value="${id}"> \
-            <td>${minsBefore} minutes before banana time</td> \
-            <td>${text}</td> \
-            <td title="Remove announcement"><button id="${id}" class="btn btn-danger remove-announcement-button">Remove</button></td> \
-    </tr>`));
-}
 
 /**
  * Format a time string from HH:MM:SS to HH:MM
@@ -515,7 +447,7 @@ async function getBananaText() {
 }
 
 /**
- * Update the main-content div to show the Announcements
+ * Update the main-content div to show the Announcements table
  */
 async function showAnnouncements() {
     // Create the new content div
@@ -523,40 +455,51 @@ async function showAnnouncements() {
     content.classList.add("container");
 
     // Get current announcements
-    // const announcements = ;
+    const announcements = await getAnnouncements();
 
-    // Set new HTML content
-    // TODO fix this so it generates the table properly
+    // Generate the announcements table
+    let announcementTable = `
+        <table class="table" id="announcement-table">
+        <tr>
+            <th>Time</th>
+            <th>Message</th>
+            <th></th>
+        </tr>
+    `;
+
+    Object.keys(announcements).forEach(function(key) {
+        const value = announcements[key];
+
+        // Check if announcement is a Minutes Before Announcement
+        if (value.hasOwnProperty("mins_before")) {
+            announcementTable += `
+                <tr id="announcement-id-${value.id}">
+                    <input type="hidden" name="announcement_id" value="${value.id}">
+                    <td>${value.mins_before} minutes before banana time</td>
+                    <td>${value.text}</td>
+                    <td title="Remove announcement"><button id="${value.id}" class="btn btn-danger remove-announcement-button">Remove</button></td>
+                </tr>
+            `;
+        } else {
+            announcementTable += `
+                <tr id="announcement-id-${value.id}" class="remove-announcement-form">
+                    <input type="hidden" name="announcement_id" value="${value.id }">
+                    <td>${formatTime(value.time)}</td>
+                    <td>${value.text}</td>
+                    <td title="${value.id === 'banana_time' ? 'Cannot remove banana time announcement' : 'Remove announcement'}">
+                        <button ${value.id !== 'banana_time' ? `id="${value.id}"` : ''} class="${value.id !== 'banana_time' ? 'btn btn-danger remove-announcement-button' : 'btn btn-secondary'}" ${value.id === 'banana_time' ? 'disabled' : ''}>Remove</button>
+                    </td>                    
+                </tr>
+            `;
+        }
+    });
+
+    // Add the table to content
     content.innerHTML = `
         <br>
-        <h3>Scheduled</h3>
-        <table class="table" id="announcement-table">
-            <tr>
-                <th>Time</th>
-                <th>Message</th>
-                <th></th>
-            </tr>
-            {% for key in announcements %}
-                {% if announcements[key].time != None %}
-                    <tr id="announcement-id-{{ announcements[key].id }}" class="remove-announcement-form">
-                        <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                        <td>{{ announcements[key].time.strftime("%H:%M") }}</td>
-                        <td>{{ announcements[key].text }}</td>
-                        {% if announcements[key].id != 'banana_time' %}
-                            <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
-                        {% else %}
-                            <td title="Cannot remove banana time announcement"><button class="btn btn-secondary" disabled>Remove</button></td>
-                        {% endif %}
-                    </tr>
-                {% else %}
-                    <tr id="announcement-id-{{ announcements[key].id }}">
-                        <input type="hidden" name="announcement_id" value="{{ announcements[key].id }}">
-                        <td>{{ announcements[key].mins_before }} minutes before banana time</td>
-                        <td>{{ announcements[key].text }}</td>
-                        <td title="Remove announcement"><button id="{{ announcements[key].id }}" class="btn btn-danger remove-announcement-button">Remove</button></td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
+        <h3>Scheduled Announcements</h3>
+        <p><i>Shows all currently scheduled announcements</i></p>
+        ${announcementTable}
         </table>
     `;
 
@@ -564,6 +507,16 @@ async function showAnnouncements() {
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = '';
     mainContent.appendChild(content);
+}
+
+
+/**
+ * Gets the announcements from the server
+ */
+async function getAnnouncements() {
+    const response = await fetch('/announcements');
+    const announcements = await response.json();
+    return announcements;
 }
 
 /**
