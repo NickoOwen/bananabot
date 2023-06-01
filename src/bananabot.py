@@ -271,6 +271,11 @@ async def get_profile_picture():
     return FileResponse("static/images/bb-white-background.png")
 
 
+@app.get('/status', status_code=status.HTTP_200_OK)
+def get_status(dependencies = Depends(get_current_user)):
+    return active
+
+
 @app.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
     return toggle_status()
@@ -292,6 +297,11 @@ def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(ge
     
     set_banana_time(banana_time_data.time)
     return Announcement.banana_time
+
+
+@app.get('/banana-text', status_code=status.HTTP_200_OK)
+def get_banana_text():
+    return announcements["banana_time"].text
 
 
 @app.post('/banana-text', status_code=status.HTTP_200_OK)
@@ -379,7 +389,6 @@ async def home(request: Request):
 async def admin(request: Request, dependencies = Depends(get_current_user)):
     return templates.TemplateResponse("admin.html", {
         "request": request,
-        "announcements": announcements,
         "status": active,
         "selected_days": Announcement.selected_days
     })
