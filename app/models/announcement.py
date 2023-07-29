@@ -123,7 +123,8 @@ class AnnouncementWorker(threading.Thread):
             current_day = datetime.datetime.now().strftime('%A').lower()
             logger.debug(f"Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
             if self.selected_days[current_day]:
-                Announcement.send_message(self.text)
+                from utilities import send_message
+                send_message(self.text)
 
             # Sleep until next day warning
             self.stop_event.wait(1)

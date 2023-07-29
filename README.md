@@ -19,7 +19,7 @@
 
 BananaBot (BB for short) is a good little bot created to help make sure everyone has their daily banana on time. It provides a user-friendly admin page where an administrator can configure the bot's messages and banana time. It also features a home page with a timer that counts down to banana time.
 
-BananaBot is designed to send a `POST` request to a given endpoint, allowing it to work with many popular chat platforms (e.g. Slack) via [incoming webhooks](https://api.slack.com/messaging/webhooks). The logic for sending a request can be found in [src/announcement.py](./src/announcement.py) and can be modified to suit your needs if required.
+BananaBot is designed to send a `POST` request to a given endpoint, allowing it to work with many popular chat platforms (e.g. Slack) via [incoming webhooks](https://api.slack.com/messaging/webhooks). The `send_message()` function can be found in [app/utilities/utilities.py](./app/utilities/utilities.py) and can be modified to suit your needs if required.
 
 ### Built With
 
@@ -48,16 +48,16 @@ Download and install Python `v3.10.10`
     pip install -r requirements.txt
     ```
 
-3. From the `src` directory, run the following command to run the app
+3. From the `app` directory, run the following command to run the app
     ```bash
-    python3 -m uvicorn bananabot:app
+    python3 -m uvicorn main:app
     ```
 
 ## Usage
 
-1. Set the `url` class variable in [src/announcement.py](./src/announcement.py) to your [webhook](https://api.slack.com/messaging/webhooks)
+1. Set the `url` class variable in [app/models/app_config.py](./app/models/app_config.py) to your [webhook](https://api.slack.com/messaging/webhooks). (Note this is hard coded intentionally to avoid the potential for misuse)
 
-2. [Build](#building) and [deploy](#deploying) the project
+2. [Build](#building) and [deploy](#deploying) the app
 
 3. Go to the admin page at `hostname:port/admin`
 
@@ -75,7 +75,7 @@ BananaBot is intended to be deployed in a container, but can also be ran locally
 
 1. Install Docker on your target platform (https://www.docker.com/)
 
-2. Build the BananaBot Docker image by running the following command from within the `src` directory
+2. Build the BananaBot Docker image by running the following command
     ```bash
     docker build -t bananabot .
     ```
@@ -103,7 +103,7 @@ If you have a suggestion that you think would improve BananaBot, please fork the
 
 1. To utilise FastAPI's automatic change detection when developing, add the `--reload` flag to the command as shown below
     ```bash
-    python3 -m uvicorn bananabot:app --reload
+    python3 -m uvicorn main:app --reload
     ```
 
 2. To run the unit tests, run the following command from within the `src` directory

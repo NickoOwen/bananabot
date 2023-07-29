@@ -75,7 +75,10 @@ def loadConfig():
                 # TODO consider how we handle errors if a field doesn't exist - validating config
                 app_config.banana_time = string_to_time(config.get('banana_time', ''))
                 app_config.url = config.get('url', '')
+
                 app_config.active = config.get('active', False)
+                app_config.selected_days = config.get('selected_days')
+
                 app_config.username = config.get('username', '')
                 app_config.password = config.get('password', '')
                 app_config.salt = config.get('salt', '')
@@ -145,4 +148,4 @@ def loadConfig():
     
 # Global Variables
 appState: AppConfig = loadConfig()
-workers = {}
+workers = {} # TODO Get workers working properly (currently causes errors due to use before assignment)

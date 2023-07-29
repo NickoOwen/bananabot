@@ -471,7 +471,7 @@ async function showAnnouncements() {
         const value = announcements[key];
 
         // Check if announcement is a Minutes Before Announcement
-        if (value.hasOwnProperty("mins_before")) {
+        if (value.type == "mins_before") {
             announcementTable += `
                 <tr id="announcement-id-${value.id}">
                     <input type="hidden" name="announcement_id" value="${value.id}">

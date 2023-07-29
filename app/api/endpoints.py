@@ -175,7 +175,7 @@ def post_announcements(announcement: AnnouncementData, dependencies = Depends(ge
 
 
 @router.delete('/announcements/{announcement_id}', status_code=status.HTTP_200_OK)
-def delete_announcement(announcement_id: int, dependencies = Depends(get_current_user)):
+def delete_announcement(announcement_id: str, dependencies = Depends(get_current_user)):
     if(remove_announcement(announcement_id) == False):
         # Raise exception if the type is unknown
         raise HTTPException(
