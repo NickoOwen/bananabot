@@ -5,6 +5,8 @@ import string
 import secrets
 import bcrypt
 import logging
+import yaml
+import os
 from logging.config import fileConfig
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException, Body
@@ -20,31 +22,128 @@ fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 
-#### Banana Time Variables ####
+#### BananaBot Variables ####
 announcements = {}  # Stores the announcements
 workers = {}        # Stores the workers
 active = False      # Stores the current status of the system (i.e. whether bananabot needs to send requests)
 
-# Create the banana time announcement
-banana_time_announcement = Announcement(datetime.time(15, 30, 0), "@HERE Banana Time!")
-banana_time_announcement.id = "banana_time"
+username = b"admin"
+password = ""
+salt = ""
 
-# Create the default announcements
-default_announcements = [
-    banana_time_announcement,
-    Announcement(datetime.time(10, 0, 0), "Banana time is at 15:30 today!"),
-    MinsBeforeAnnouncement(60, "Banana time is in 60 minutes!"),
-    MinsBeforeAnnouncement(30, "Banana time is in 30 minutes!"),
-    MinsBeforeAnnouncement(10, "Banana time is in 10 minutes!")
-]
+state_file = './config/state.yaml'
 
-# Add the default announcements to the announcements dictionary
-for announcement in default_announcements:
-    announcements[announcement.id] = announcement
+# Register Announcement constructor with YAML parser
+def announcement_constructor(loader, node):
+    data = loader.construct_mapping(node)
+    return Announcement(**data)
+
+yaml.add_constructor('tag:yaml.org,2002:python/object:announcement.Announcement', announcement_constructor, Loader=yaml.SafeLoader)
+
+def loadConfig():
+    """Loads the saved configuration from the YAML file"""
+
+    try:
+        with open(state_file, 'r') as file:
+            config = yaml.safe_load(file)
+
+        if config is not None:
+            global active, announcements, username, password, salt
+            active = config.get('active', False)
+            username = config.get('username', '')
+            password = config.get('password', '')
+            salt = config.get('salt', '')
+
+            announcements_data = config.get('announcements', {})
+            announcements = {}
+
+            for announcement in announcements_data:
+                text = announcement['text']
+                time = datetime.datetime.strptime(announcement['time'], '%H:%M:%S').time() if announcement['time'] else None
+                mins_before = announcement['mins_before'] if 'mins_before' in announcement else None
+
+                announcement = Announcement(text, time=time, mins_before=mins_before)
+                announcement.id = announcement['id']
+
+                announcements[announcement.id] = announcement
+
+            print('Config loaded successfully')
+        else:
+            print('No saved configuration found')
+
+    except FileNotFoundError:
+        print('No saved configuration found')
+    except Exception as e:
+        print('An error occurred while loading the configuration:', str(e))
+
+def saveConfig():
+    """Saves the current state of the app"""
+
+    print('Saving config')
+
+    # Serialise announcements
+    yaml_announcements = []
+
+    for announcement in announcements.values():
+        yaml_announcements.append(serialiseAnnouncement(announcement))
+
+
+    # Create a dictionary with the variables
+    config = {
+        'active': active,
+        'announcements': yaml_announcements,
+        'username': username,
+        'password': password,
+        'salt': salt
+    }
+
+    # Save the configuration to the YAML file
+    with open(state_file, 'w') as file:
+        yaml.dump(config, file)
+
+#### Load State ####
+# If app state is saved load it, otherwise setup with default state
+if os.path.exists(state_file):
+    # TODO load the state from state_file
+    print("App state exists")
+    loadConfig()
+else:
+    print("App state does not exist")
+    # Create the banana time announcement
+    banana_time_announcement = Announcement("@HERE Banana Time!", time=datetime.time(15, 30, 0))
+    banana_time_announcement.id = "banana_time"
+
+    # Create the default announcements
+    default_announcements = [
+        banana_time_announcement,
+        Announcement("Banana time is at 15:30 today!", time=datetime.time(10, 0, 0)),
+        Announcement("Banana time is in 60 minutes!", mins_before=60),
+        Announcement("Banana time is in 30 minutes!", mins_before=30),
+        Announcement("Banana time is in 10 minutes!", mins_before=10)
+    ]
+
+    # Add the default announcements to the announcements dictionary
+    for announcement in default_announcements:
+        announcements[announcement.id] = announcement
+
+    # Generate credentials
+    # password = ''.join(random.choice(string.ascii_letters) for i in range(10))
+    password = '12345' # TODO make this random
+    print(f'Admin Password: ', password)
+    salt = bcrypt.gensalt()
+    password = bcrypt.hashpw(password.encode("utf8"), salt)
+
+
+    # Create the config directory if it doesn't exist
+    os.makedirs(os.path.dirname('./config'), exist_ok=True)
+    saveConfig()
+
+
+
 
 
 #### Banana Time Functions ####
-def start():
+def start(): # done
     """Creates all the workers using the data from announcements. Returns True if successful"""
 
     if workers:
@@ -64,7 +163,7 @@ def start():
     return True
 
 
-def stop():
+def stop(): # done
     """Stop all running workers. Returns True if successful"""
 
     global workers
@@ -81,7 +180,7 @@ def stop():
     return True
 
 
-def update():
+def update(): # done
     """Stops and re-creates all workers so they are updated with the latest system changes"""
     
     if active:
@@ -90,7 +189,7 @@ def update():
         start()
 
 
-def string_to_time(new_time):
+def string_to_time(new_time): # done
     """Takes a string as input and returns a datetime.time object"""
 
     t = time.strptime(new_time, "%H:%M")
@@ -107,6 +206,7 @@ def set_banana_time(time):
 
     # Call update so any running workers can be updated
     update()
+    saveConfig()
 
 
 def set_banana_time_text(text):
@@ -132,6 +232,7 @@ def add_time_announcement(time, text):
         workers[worker.id] = worker
         workers[worker.id].start()
 
+    saveConfig()
     return new_announcement.id
 
 
@@ -183,7 +284,7 @@ def remove_announcement(id):
     return True
 
 
-def toggle_status():
+def toggle_status(): # done
     """Toggles the status of the system (active). Returns the new value of active"""
     
     global active
@@ -200,7 +301,7 @@ def toggle_status():
     return active
 
 
-def update_selected_days(new_selected_days):
+def update_selected_days(new_selected_days): # done
     """Updates the selected_days with new_selected_days"""
 
     logger.info(f"Updating selected days with: { new_selected_days }")
@@ -216,9 +317,9 @@ def update_selected_days(new_selected_days):
 #### Authentication ####
 security = HTTPBasic()
 
-username = b"admin"
-password = ""
-salt = bcrypt.gensalt()
+# username = b"admin"
+# password = ""
+# salt = bcrypt.gensalt()
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     # Validate username
@@ -253,11 +354,12 @@ def startup_event():
     global password
 
     # Generate random password and print it, then encode
-    password = ''.join(random.choice(string.ascii_letters) for i in range(10))
-    print(f"Admin Password: { password }")
+    # password = ''.join(random.choice(string.ascii_letters) for i in range(10))
+    # print(f"Admin Password: { password }")
 
     # Hash the password and store the hash
-    password = bcrypt.hashpw(password.encode("utf8"), salt)
+    # if password == '':
+    #     password = bcrypt.hashpw(password.encode("utf8"), salt)
 
 
 #### API Endpoints ####

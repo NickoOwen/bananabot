@@ -1,13 +1,14 @@
 import yaml
 import os
 import datetime
+import time
 import bcrypt
 from typing import Dict
 
 from .announcement import Announcement, serialiseAnnouncement
 
 class AppConfig:
-    banana_time = datetime.time(15, 30, 0) # TODO this needs to be "serialised" for saving/loading
+    banana_time = datetime.time(15, 30, 0)
     url = 'http://your.endpoint.here'
 
     active: bool = False
@@ -23,12 +24,12 @@ class AppConfig:
     }
 
     username = 'admin'
-    password = '12345'
+    password = b'12345'
     salt = 'saaaltyy'
 
 state_file = './config/state.yaml'
 
-def saveConfig(config: AppConfig):
+def saveConfig(config):
     print('Saving config')
 
     # Serialise announcements
@@ -40,7 +41,7 @@ def saveConfig(config: AppConfig):
 
     # Create a dictionary with the variables
     serialisedConfig = {
-        'banana_time': str(config.banana_time),
+        'banana_time': config.banana_time.strftime('%H:%M'),
         'url': config.url,
         'active': config.active,
         'announcements': yaml_announcements,
@@ -54,6 +55,12 @@ def saveConfig(config: AppConfig):
     with open(state_file, 'w') as file:
         yaml.dump(serialisedConfig, file)
 
+def string_to_time(new_time: str):
+    """Takes a string as input and returns a datetime.time object"""
+
+    t = time.strptime(new_time, "%H:%M")
+    return datetime.time(hour = t.tm_hour, minute = t.tm_min)
+
 def loadConfig():
     if os.path.exists(state_file):
         print("App state exists")
@@ -65,6 +72,9 @@ def loadConfig():
             if config is not None:
                 app_config = AppConfig
 
+                # TODO consider how we handle errors if a field doesn't exist - validating config
+                app_config.banana_time = string_to_time(config.get('banana_time', ''))
+                app_config.url = config.get('url', '')
                 app_config.active = config.get('active', False)
                 app_config.username = config.get('username', '')
                 app_config.password = config.get('password', '')
@@ -101,7 +111,7 @@ def loadConfig():
         # Return default AppConfig
         app_config = AppConfig
         app_config.active = False
-        app_config.username = 'admin'
+        app_config.username = b'admin'
 
         # Create the banana time announcement
         banana_time_announcement = Announcement("@HERE Banana Time!", time=datetime.time(15, 30, 0))
@@ -132,4 +142,7 @@ def loadConfig():
         os.makedirs(os.path.dirname('./config'), exist_ok=True)
         saveConfig(app_config)
         return app_config
-
+    
+# Global Variables
+appState: AppConfig = loadConfig()
+workers = {}

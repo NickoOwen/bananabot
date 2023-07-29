@@ -8,27 +8,25 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from main import appData
-from models import Announcement, AnnouncementData, BananaTimeData, SelectedDaysData
+from models import Announcement, AnnouncementData, BananaTimeData, SelectedDaysData, appState, saveConfig
 from utilities import toggle_status, string_to_time, update, add_worker, remove_announcement
 
 router = APIRouter()
 security = HTTPBasic()
 
-router.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     # Validate username
     current_username_bytes = credentials.username.encode("utf8")
     is_correct_username = secrets.compare_digest(
-        current_username_bytes, appData.username
+        current_username_bytes, appState.username
     )
 
     # Validate hashed passwords 
-    current_password_bytes = bcrypt.hashpw(credentials.password.encode("utf8"), appData.salt)
+    current_password_bytes = bcrypt.hashpw(credentials.password.encode("utf8"), appState.salt)
     is_correct_password = secrets.compare_digest(
-        current_password_bytes, appData.password
+        current_password_bytes, appState.password
     )
 
     # Throw exception if credentials are incorrect
@@ -66,7 +64,7 @@ async def get_profile_picture():
 
 @router.get('/status', status_code=status.HTTP_200_OK)
 def get_status(dependencies = Depends(get_current_user)):
-    return appData.active
+    return appState.active
 
 
 @router.post('/toggle-status', status_code=status.HTTP_200_OK)
@@ -76,7 +74,7 @@ def update_status(dependencies = Depends(get_current_user)):
 
 @router.get('/banana-time', status_code=status.HTTP_200_OK)
 def get_banana_time():
-    return appData.banana_time
+    return appState.banana_time
 
 
 @router.post('/banana-time', status_code=status.HTTP_200_OK)
@@ -88,13 +86,15 @@ def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(ge
             detail="Unrecognised announcement type"
         )
     
-    appData.banana_time = string_to_time(banana_time_data.time)
-    return appData.banana_time
+    appState.banana_time = string_to_time(banana_time_data.time)
+    
+    saveConfig(appState)
+    return appState.banana_time
 
 
 @router.get('/banana-text', status_code=status.HTTP_200_OK)
 def get_banana_text():
-    return appData.announcements['banana_time'].text
+    return appState.announcements['banana_time'].text
 
 
 @router.post('/banana-text', status_code=status.HTTP_200_OK)
@@ -106,13 +106,14 @@ def post_banana_text(banana_time_data: BananaTimeData, dependencies = Depends(ge
             detail="Unrecognised announcement type"
         )
 
-    appData.announcements['banana_time'].text = banana_time_data.text
-    return appData.announcements['banana_time'].text
+    appState.announcements['banana_time'].text = banana_time_data.text
+    saveConfig(appState)
+    return appState.announcements['banana_time'].text
 
 
 @router.get('/selected-days', status_code=status.HTTP_200_OK)
 def get_selected_days(dependencies = Depends(get_current_user)):
-    return appData.selected_days
+    return appState.selected_days
 
 
 @router.post('/selected-days', status_code=status.HTTP_200_OK)
@@ -127,15 +128,16 @@ def post_selected_days(new_days: SelectedDaysData, dependencies = Depends(get_cu
         "sunday": new_days.sunday == "on"
     }
 
-    appData.selected_days = new_days
-    update()
+    appState.selected_days = new_days
 
-    return appData.selected_days
+    update()
+    saveConfig(appState)
+    return appState.selected_days
 
 
 @router.get('/announcements')
 def get_announcements(dependencies = Depends(get_current_user)):
-    return appData.announcements
+    return appState.announcements
 
 
 @router.post('/announcements', status_code=status.HTTP_201_CREATED)
@@ -144,25 +146,25 @@ def post_announcements(announcement: AnnouncementData, dependencies = Depends(ge
         case 'time':
             # Create the new announcement
             new_announcement = Announcement(announcement.text, time=string_to_time(announcement.time))
-            appData.announcements[new_announcement.id] = new_announcement
+            appState.announcements[new_announcement.id] = new_announcement
 
             # Add a worker if the app is active
-            if appData.active:
-                add_worker(appData.announcements[new_announcement.id])
+            if appState.active:
+                add_worker(appState.announcements[new_announcement.id])
 
-            return appData.announcements[new_announcement.id]
+            return appState.announcements[new_announcement.id]
         case 'mins_before':
             # Create the new announcement
             new_announcement = Announcement(announcement.text, mins_before=announcement.mins_before)
-            appData.announcements[new_announcement.id] = new_announcement
+            appState.announcements[new_announcement.id] = new_announcement
 
             # Add a worker if the app is active
-            if appData.active:
-                add_worker(appData.announcements[new_announcement.id])
+            if appState.active:
+                add_worker(appState.announcements[new_announcement.id])
 
-            return appData.announcements[new_announcement.id]
+            return appState.announcements[new_announcement.id]
         case 'instant':
-            appData.send_message(announcement.text)
+            appState.send_message(announcement.text)
             return
         
     # Raise exception if the type is unknown
@@ -190,9 +192,10 @@ async def get_healthcheck():
 #### Web Pages ####
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    print(f'appState: {appState}')
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "banana_time": Announcement.banana_time.strftime("%H:%M")
+        "banana_time": appState.banana_time.strftime("%H:%M")
         })
 
 
@@ -200,6 +203,6 @@ async def home(request: Request):
 async def admin(request: Request, dependencies = Depends(get_current_user)):
     return templates.TemplateResponse("admin.html", {
         "request": request,
-        "status": appData.active,
-        "selected_days": appData.selected_days
+        "status": appState.active,
+        "selected_days": appState.selected_days
     })
