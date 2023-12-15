@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - The ability to store state to enable persistence across container / app reboots
 
+## [4.1.1] - 2023-09-05
+- Updated requirements.txt with later versions to address security vulnerabilities
+
+## [4.1.0] - 2023-06-01
+- Updated the admin user interface
+- Added a side navigation bar to the admin UI
+- Content in the admin UI is now dynamically loaded and only loads the options a user is currently editing (based on the category selected in the sidebar)
+- Added descriptions for further clarification of each setting in the admin UI and additional feedback for the user when making changes
+
 ## [4.0.0] - 2023-03-09
 
 #### Added
