@@ -26,6 +26,8 @@ def start():
 def stop():
     """Stop all running workers. Returns True if successful"""
 
+    global workers
+
     # Check if the workers dictionary is empty
     if not workers:
         logger.warning("Tried to stop workers when no workers exist")
@@ -44,6 +46,14 @@ def update():
     if appState.active:
         logger.debug("Updating workers...")
         stop()
+        start()
+
+
+def initialSetup():
+    """Runs the initial setup for the app after the config has been loaded"""
+
+    if appState.active:
+        logger.info('BananaBot is ACTIVE. Starting workers...')
         start()
 
 

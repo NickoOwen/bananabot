@@ -1,3 +1,5 @@
+import random
+import string
 import yaml
 import os
 import datetime
@@ -6,6 +8,9 @@ import bcrypt
 from typing import Dict
 
 from .announcement import Announcement, serialiseAnnouncement
+from logger import get_logger
+
+logger = get_logger()
 
 class AppConfig:
     banana_time = datetime.time(15, 30, 0)
@@ -23,14 +28,15 @@ class AppConfig:
         "sunday": False
     }
 
+    # Just class defaults. These are overridden in the setup
     username = 'admin'
     password = b'12345'
-    salt = 'saaaltyy'
+    salt = 'salt'
 
 state_file = './config/state.yaml'
 
 def saveConfig(config):
-    print('Saving config')
+    logger.debug('Saving config')
 
     # Serialise announcements
     yaml_announcements = []
@@ -63,7 +69,7 @@ def string_to_time(new_time: str):
 
 def loadConfig():
     if os.path.exists(state_file):
-        print("App state exists")
+        logger.debug("App state exists")
 
         try:
             with open(state_file, 'r') as file:
@@ -96,20 +102,18 @@ def loadConfig():
 
                     app_config.announcements[new_announcement.id] = new_announcement
 
-                print('Config loaded successfully')
+                logger.info('Configuration loaded successfully')
 
                 return app_config
             else:
-                # TODO proper logging / errors
-                print('No saved configuration found')
-
+                logger.debug('No saved configuration found')
         except FileNotFoundError:
-            print('No saved configuration found')
+            logger.error('No saved configuration found')
         except Exception as e:
-            print('An error occurred while loading the configuration:', str(e))
+            logger.error('An error occurred while loading the configuration:', str(e))
     
     else:
-        print("App state does not exist")
+        logger.info("No saved configuration found. Performing first time setup...")
 
         # Return default AppConfig
         app_config = AppConfig
@@ -134,18 +138,17 @@ def loadConfig():
             app_config.announcements[announcement.id] = announcement
 
         # Generate credentials
-        # password = ''.join(random.choice(string.ascii_letters) for i in range(10))
-        app_config.password = '12345' # TODO make this random
-        print(f'Admin Password: ', app_config.password)
+        app_config.password = ''.join(random.choice(string.ascii_letters) for i in range(10))
+        logger.info(f'Admin Password: {app_config.password}')
         app_config.salt = bcrypt.gensalt()
         app_config.password = bcrypt.hashpw(app_config.password.encode("utf8"), app_config.salt)
 
 
-        # Create the config directory if it doesn't exist
-        os.makedirs(os.path.dirname('./config'), exist_ok=True)
+        # Create the config directory if it doesn't exist and save config
+        os.makedirs(os.path.dirname('./config/'), exist_ok=True)
         saveConfig(app_config)
         return app_config
     
 # Global Variables
 appState: AppConfig = loadConfig()
-workers = {} # TODO Get workers working properly (currently causes errors due to use before assignment)
+workers = {}
