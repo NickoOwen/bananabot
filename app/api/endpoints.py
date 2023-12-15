@@ -142,6 +142,8 @@ def get_announcements(dependencies = Depends(get_current_user)):
 
 @router.post('/announcements', status_code=status.HTTP_201_CREATED)
 def post_announcements(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
+    # TODO Save the config when a new announcement is added
+    # TODO Possibly move the logic here into utilities.py same as remove_announcement
     match announcement.type:
         case 'time':
             # Create the new announcement
