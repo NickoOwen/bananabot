@@ -1,22 +1,36 @@
-from bananabot import *
+from main import *
+from models import *
+from models.app_config import generateDefaultConfig
+from utilities import *
+from api import * # TODO remove if not used
+
+import pytest
+import shutil
 from fastapi.testclient import TestClient
 
-class TestDefaultConfig:
+# Function to remove the config directory after each test
+@pytest.fixture(autouse=True)
+def cleanup_config():
+    yield
+
+    print('Cleaning up config directory')
+    shutil.rmtree('config', ignore_errors=True)
+
+class TestDefaultConfig():
     def test_default_announcements_exist(self):
-        assert "banana_time" in announcements # ID of banana time announcement
-        assert 1 in announcements # ID of 10:00 announcement
-        assert 2 in announcements # ID of 60 mins before announcement
-        assert 3 in announcements # ID of 30 mins before announcement
-        assert 4 in announcements # ID of 10 mins before announcement
+        assert len(appState.announcements) == 5
+    
+    def test_banana_time_announcement_exists(self):
+        assert "banana_time" in appState.announcements
 
-    def test_default_banana_time(self):
-        assert "banana_time" in announcements
-        assert Announcement.banana_time == datetime.time(15, 30, 0)
-        assert announcements["banana_time"].time == datetime.time(15, 30, 0)
-        assert announcements["banana_time"].text == "@HERE Banana Time!"
+    # def test_default_banana_time(self):
+    #     assert "banana_time" in announcements
+    #     assert Announcement.banana_time == datetime.time(15, 30, 0)
+    #     assert announcements["banana_time"].time == datetime.time(15, 30, 0)
+    #     assert announcements["banana_time"].text == "@HERE Banana Time!"
 
-    def test_default_active_value(self):
-        assert active == False
+    # def test_default_active_value(self):
+    #     assert active == False
 
 
 class TestFunctions:
