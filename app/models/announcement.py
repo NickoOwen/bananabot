@@ -6,10 +6,13 @@ from pydantic import BaseModel
 from logger import get_logger
 
 logger = get_logger()
+logger.name = 'announcement'
 
 #### Announcement ####
 class Announcement:
-
+    """
+    A data class used for storing the data for announcements
+    """
     
     def __init__(self, text, time=None, mins_before=None):
         # Check at least one of `time` or `mins_before` is set but not both

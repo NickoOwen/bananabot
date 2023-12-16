@@ -6,6 +6,7 @@ from models import Announcement, AnnouncementWorker, appState, workers, saveConf
 from logger import get_logger
 
 logger = get_logger()
+logger.name = 'utilities'
 
 
 def start():
@@ -44,7 +45,7 @@ def update():
     """Stops and re-creates all workers so they are updated with the latest system changes"""
     
     if appState.active:
-        logger.debug("Updating workers...")
+        logger.debug("Updating workers")
         stop()
         start()
 
@@ -53,7 +54,7 @@ def initialSetup():
     """Runs the initial setup for the app after the config has been loaded"""
 
     if appState.active:
-        logger.info('BananaBot is ACTIVE. Starting workers...')
+        logger.info('BananaBot is ACTIVE. Starting workers')
         start()
 
 
@@ -119,7 +120,7 @@ def remove_announcement(id: str):
     appState.announcements.pop(id)
 
     if appState.active:
-        logger.info(f"Terminating worker with ID {id}")
+        logger.debug(f"Terminating worker with ID {id}")
         workers[id].stop_event.set()
         workers.pop(id)
 
