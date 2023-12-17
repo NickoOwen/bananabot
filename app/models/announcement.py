@@ -137,9 +137,11 @@ class AnnouncementWorker(threading.Thread):
 
 
 #### Data Classes ####
+# These are used for transferring data between the frontend and backend
+
 class AnnouncementData(BaseModel):
     """
-    A class used for transporting Announcement data between the frontend and backend
+    A class used for transferring Announcement data between the frontend and backend
 
     Attributes
     ----------
@@ -160,7 +162,7 @@ class AnnouncementData(BaseModel):
 
 class SelectedDaysData(BaseModel):
     """
-    A class used for transporting selected days data between the frontend and backend
+    A class used for transferring selected days data between the frontend and backend
 
     Attributes
     ----------
@@ -190,7 +192,7 @@ class SelectedDaysData(BaseModel):
 
 class BananaTimeData(BaseModel):
     """
-    A class used for transporting banana time data
+    A class used for transferring banana time data
 
     Attributes
     ----------

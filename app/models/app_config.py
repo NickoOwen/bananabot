@@ -34,8 +34,170 @@ class AppConfig:
     password = b'12345'
     salt = 'salt'
 
-configuration_file = './config/state.yaml'
+# configuration_file = './config/state.yaml'
 
+class AppState:
+    # Fields
+    banana_time = datetime.time(15, 30, 0)
+    url = 'http://your.endpoint.here'
+
+    active: bool = False
+    announcements: Dict[str, Announcement] = {}
+    selected_days = {
+        "monday": True,
+        "tuesday": True,
+        "wednesday": True,
+        "thursday": True,
+        "friday": True,
+        "saturday": False,
+        "sunday": False
+    }
+
+    # Just class defaults. These are overridden in the setup
+    username = 'admin'
+    password = b'12345'
+    salt = 'salt'
+
+    # Workers dictionary
+    workers = {}
+
+    # Internal class variables
+    _instance = None
+    _configuration_file = './config/state.yaml'
+
+    # Methods
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = AppState
+            cls._instance = cls._load_state()
+        return cls._instance
+    
+
+    @classmethod
+    def _load_state(cls):
+        if os.path.exists(cls._configuration_file):
+            logger.debug("Configuration file exists")
+
+            try:
+                with open(cls._configuration_file, 'r') as file:
+                    config = yaml.safe_load(file)
+
+                if config is not None:
+                    cls.banana_time = string_to_time(config.get('banana_time', ''))
+                    cls.url = config.get('url', '')
+
+                    cls.active = config.get('active', False)
+                    cls.selected_days = config.get('selected_days')
+
+                    cls.username = config.get('username', '')
+                    cls.password = config.get('password', '')
+                    cls.salt = config.get('salt', '')
+
+                    announcements_data = config.get('announcements', {})
+                    cls.announcements = {}
+
+                    for announcement_id, announcement in announcements_data.items():
+                        text = announcement.get('text', '')
+                        time = datetime.datetime.strptime(announcement.get('time', ''), '%H:%M:%S').time() if announcement.get('time') else None
+                        mins_before = announcement.get('mins_before') if 'mins_before' in announcement else None
+
+                        new_announcement = Announcement(text, time=time, mins_before=mins_before)
+                        new_announcement.id = announcement_id
+
+                        cls.announcements[new_announcement.id] = new_announcement
+
+                    logger.info('Configuration loaded successfully')
+                else:
+                    logger.error('Configuration file was found and loaded but was empty')
+            except Exception as e:
+                logger.error(f'An error occurred while loading the configuration: {e}')
+        else:
+            logger.info("No configuration file detected. Performing first time setup")
+            cls._set_default_config()
+
+        # Return default configuration if an error occurs while loading or reading the configuration / file
+        logger.warning('An error occurred while attempting to load or read the configuration file. Performing first time setup to recover')
+        cls._set_default_config()
+
+
+    def _set_default_config(cls):
+        logger.debug('Using default configuration')
+        # Remove old config file if it exists
+        if os.path.exists(cls._configuration_file):
+            os.remove(cls._configuration_file)
+
+        cls.active = False
+        cls.username = b'admin'
+
+        # Create the banana time announcement
+        banana_time_announcement = Announcement("@HERE Banana Time!", time=datetime.time(15, 30, 0))
+        banana_time_announcement.id = "banana_time"
+
+        # Create the default announcements
+        default_announcements = [
+            banana_time_announcement,
+            Announcement("Banana time is at 15:30 today!", time=datetime.time(10, 0, 0)),
+            Announcement("Banana time is in 60 minutes!", mins_before=60),
+            Announcement("Banana time is in 30 minutes!", mins_before=30),
+            Announcement("Banana time is in 10 minutes!", mins_before=10)
+        ]
+
+        # Add the default announcements to the announcements dictionary
+        for announcement in default_announcements:
+            cls.announcements[announcement.id] = announcement
+
+        # Generate credentials
+        cls.password = ''.join(random.choice(string.ascii_letters) for i in range(10))
+        logger.info(f'Admin Password: {cls.password}')
+        cls.salt = bcrypt.gensalt()
+        cls.password = bcrypt.hashpw(cls.password.encode("utf8"), cls.salt)
+
+
+    def save_state(cls):
+        logger.debug('Saving config')
+        state: AppState = cls.get_instance()
+
+        # Serialise announcements
+        yaml_announcements = []
+
+        for announcement in state.announcements.values():
+            yaml_announcements.append(serialiseAnnouncement(announcement))
+
+
+        # Create a dictionary with the variables
+        serialisedConfig = {
+            'banana_time': state.banana_time.strftime('%H:%M'),
+            'url': state.url,
+            'active': state.active,
+            'announcements': yaml_announcements,
+            'selected_days': state.selected_days,
+            'username': state.username,
+            'password': state.password,
+            'salt': state.salt
+        }
+
+        # Create config directory if it does not exist
+        os.makedirs(os.path.dirname('./config/'), exist_ok=True)
+
+        # Save the configuration to the YAML file
+        with open(cls._configuration_file, 'w') as file:
+            yaml.dump(serialisedConfig, file)
+    
+
+# Global Variables
+APP_STATE: AppState = AppState.get_instance()
+workers = {}
+
+
+
+
+
+
+
+
+
+###### OLD FUNCTIONS ######
 def saveConfig(config):
     logger.debug('Saving config')
 
@@ -72,6 +234,10 @@ def string_to_time(new_time: str):
 
 def generateDefaultConfig():
     logger.debug('Generating default configuration...')
+    # Remove old config file if it exists
+    if os.path.exists(configuration_file):
+        os.remove(configuration_file)
+
     app_config = AppConfig
     app_config.active = False
     app_config.username = b'admin'
@@ -98,11 +264,6 @@ def generateDefaultConfig():
     logger.info(f'Admin Password: {app_config.password}')
     app_config.salt = bcrypt.gensalt()
     app_config.password = bcrypt.hashpw(app_config.password.encode("utf8"), app_config.salt)
-
-
-    # Create the config directory if it doesn't exist and save config
-    os.makedirs(os.path.dirname('./config/'), exist_ok=True)
-    saveConfig(app_config)
 
     return app_config
 
@@ -158,8 +319,8 @@ def loadConfig():
     logger.warning('An error occurred while attempting to load or read the configuration file. Performing first time setup to recover')
     return generateDefaultConfig()
 
-        
-    
-# Global Variables
-appState: AppConfig = loadConfig()
-workers = {}
+
+# appState = loadConfig()
+# # Create the config directory if it doesn't exist and save config
+# os.makedirs(os.path.dirname('./config/'), exist_ok=True)
+# saveConfig(appState)

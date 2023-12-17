@@ -56,7 +56,8 @@ def get_status(dependencies = Depends(get_current_user)):
 
 @router.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
-    return toggle_status()
+    toggle_status()
+    return appState.active
 
 
 @router.get('/banana-time', status_code=status.HTTP_200_OK)
@@ -74,7 +75,9 @@ def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(ge
         )
     
     appState.banana_time = string_to_time(banana_time_data.time)
+    appState.announcements['banana_time'].time = string_to_time(banana_time_data.time)
     
+    update()
     saveConfig(appState)
     return appState.banana_time
 
@@ -128,7 +131,7 @@ def get_announcements(dependencies = Depends(get_current_user)):
 
 
 @router.post('/announcements', status_code=status.HTTP_201_CREATED)
-def post_announcements(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
+def post_announcement(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
     # Note: This logic could probably be moved to utilities to keep the endpoints file a bit cleaner
     match announcement.type:
         case 'time':
