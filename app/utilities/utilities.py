@@ -3,9 +3,10 @@ import time
 import requests
 
 from models import Announcement, AnnouncementWorker, AppState
-from logger import get_logger
+import logging
 
-logger = get_logger()
+# Use FastAPI's default logger
+logger = logging.getLogger("uvicorn")
 logger.name = 'utilities'
 
 
@@ -135,7 +136,7 @@ def remove_announcement(id: str):
     app_state.announcements.pop(id)
 
     if app_state.active:
-        logger.debug(f"Terminating worker with ID {id}")
+        logger.info(f"Terminating worker with ID {id}")
         app_state.workers[id].stop_event.set()
         app_state.workers.pop(id)
 

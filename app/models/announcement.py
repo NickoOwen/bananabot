@@ -3,10 +3,11 @@ import uuid
 import threading
 from pydantic import BaseModel
 
-from logger import get_logger
+import logging
 
-logger = get_logger()
-logger.name = 'announcement'
+# Use FastAPI's default logger
+logger = logging.getLogger("uvicorn")
+logger.name = 'utilities'
 
 #### Announcement ####
 class Announcement:
@@ -117,17 +118,17 @@ class AnnouncementWorker(threading.Thread):
             
             sleep_time = alert_time - current_time
             sleep_time_seconds = sleep_time.seconds
-            logger.debug(f"Announcement with ID {str(self.id)} is sleeping for {str(sleep_time_seconds)} seconds")
+            logger.info(f"Announcement with ID {str(self.id)} is sleeping for {str(sleep_time_seconds)} seconds")
             self.stop_event.wait(sleep_time_seconds + 1) # Offset by 1 second
 
             # Break the loop if the threads have been ordered to stop
             if self.stop_event.is_set():
-                logger.debug(f"Announcement {str(self.id)} stopping...")
+                logger.info(f"Announcement {str(self.id)} stopping...")
                 break
 
             # Check the current day and send message if required
             current_day = datetime.datetime.now().strftime('%A').lower()
-            logger.debug(f"Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
+            logger.info(f"Announcement (id: {str(self.id)}) post on {current_day}: {str(self.selected_days[current_day])}")
             if self.selected_days[current_day]:
                 from utilities import send_message
                 send_message(self.text)
@@ -135,7 +136,7 @@ class AnnouncementWorker(threading.Thread):
             # Sleep until next day warning
             self.stop_event.wait(1)
             if self.stop_event.is_set():
-                logger.debug(f"Announcement {str(self.id)} stopping...")
+                logger.info(f"Announcement {str(self.id)} stopping...")
                 break
 
 

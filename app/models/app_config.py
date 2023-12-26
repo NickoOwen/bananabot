@@ -8,10 +8,11 @@ import bcrypt
 from typing import Dict
 
 from .announcement import Announcement, serialiseAnnouncement
-from logger import get_logger
+import logging
 
-logger = get_logger()
-logger.name = 'app_state'
+# Use FastAPI's default logger
+logger = logging.getLogger("uvicorn")
+logger.name = 'utilities'
 
 def string_to_time(new_time: str):
     """Takes a string as input and returns a datetime.time object"""
@@ -61,7 +62,7 @@ class AppState:
     @classmethod
     def _load_state(cls):
         if os.path.exists(cls._configuration_file):
-            logger.debug("Configuration file exists")
+            logger.info("Configuration file exists")
 
             try:
                 with open(cls._configuration_file, 'r') as file:
@@ -108,7 +109,7 @@ class AppState:
 
 
     def _set_default_config(cls):
-        logger.debug('Using default configuration')
+        logger.info('Using default configuration')
         # Remove old config file if it exists
         if os.path.exists(cls._configuration_file):
             os.remove(cls._configuration_file)
