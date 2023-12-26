@@ -106,7 +106,7 @@ If you have a suggestion that you think would improve BananaBot, please fork the
     python3 -m uvicorn main:app --reload
     ```
 
-2. To run the unit tests, run the following command from within the `src` directory
+2. To run the unit tests, run the following command from within the `app` directory
     ```
     python3 -m pytest ./tests
     ```
