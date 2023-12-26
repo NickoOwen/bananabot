@@ -216,7 +216,7 @@ $(document).on('submit', '#banana-time-text-form', function(e) {
         // Update the form with the new text
         success: function (data, status, xhr) {
             document.getElementById("banana-time-text-input").value = data;
-            alert("Success: New Banana Time message set");
+            alert(`Success: Banana Time message is now '${data}'`);
         },
 
         // Create a popup if the server returns an error

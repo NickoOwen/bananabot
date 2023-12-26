@@ -243,8 +243,8 @@ class TestApiEndpoints:
 
     def test_toggle_status(self, mocker):
         # Mock functions
-        mocker.patch('utilities.start', return_value=True)
-        mocker.patch('utilities.stop', return_value=False)
+        mocker.patch('utilities.utilities.start', return_value=True)
+        mocker.patch('utilities.utilities.stop', return_value=False)
 
         app.dependency_overrides[get_current_user] = mock_get_current_user
 
@@ -420,22 +420,22 @@ class TestApiEndpoints:
         app.dependency_overrides = {}
 
 
-    # def test_post_instant_announcement(self, mocker):
-    #     # Mock send_message function
-    #     mocker.patch('utilities.send_message', return_value=True)
-    #     app.dependency_overrides[get_current_user] = mock_get_current_user
+    def test_post_instant_announcement(self, mocker):
+        # Mock send_message function
+        mocker.patch('utilities.utilities.send_message', return_value=True)
+        app.dependency_overrides[get_current_user] = mock_get_current_user
 
-    #     response = client.post(
-    #         "/announcements",
-    #         headers={},
-    #         json={
-    #             "type": "instant",
-    #             "text": "test"
-    #         },
-    #     )
+        response = client.post(
+            "/announcements",
+            headers={},
+            json={
+                "type": "instant",
+                "text": "test"
+            },
+        )
 
-    #     assert response.status_code == 201
-    #     app.dependency_overrides = {}
+        assert response.status_code == 201
+        app.dependency_overrides = {}
 
 
     def test_post_unknown_type_announcement(self):
