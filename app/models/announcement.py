@@ -70,7 +70,10 @@ class AnnouncementWorker(threading.Thread):
         announcement : Announcement
             takes an Announcement as a parameter and creates the worker using the Announcement data
         """
-        from models import appState
+
+        # Get the app state
+        from models import AppState
+        app_state: AppState = AppState.get_instance()
 
         # Check at least one of `time` or `mins_before` is set but not both
         if announcement.time is None and announcement.mins_before is None:
@@ -91,8 +94,8 @@ class AnnouncementWorker(threading.Thread):
         self.text = announcement.text
         self.time = announcement.time
         self.mins_before = announcement.mins_before
-        self.banana_time = appState.banana_time
-        self.selected_days = appState.selected_days
+        self.banana_time = app_state.banana_time
+        self.selected_days = app_state.selected_days
 
     def calculate_alert_time(self):
         """Calculates the alert time using the object's data"""

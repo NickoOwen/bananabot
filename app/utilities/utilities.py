@@ -2,24 +2,27 @@ import datetime
 import time
 import requests
 
-from models import Announcement, AnnouncementWorker, appState, workers, saveConfig
+from models import Announcement, AnnouncementWorker, AppState
 from logger import get_logger
 
 logger = get_logger()
 logger.name = 'utilities'
 
 
+
 def start():
     """Creates all the workers using the data from announcements. Returns True if successful"""
 
-    if workers:
-        logger.warning("Found running workers when attempting to create workers. Expected 'workers' to be empty")
+    app_state = AppState.get_instance()
+
+    if app_state.workers:
+        logger.warning("Found running workers when attempting to create workers. Expected 'app_state.workers' to be empty")
         return False
 
-    for announcement in appState.announcements.values():
+    for announcement in app_state.announcements.values():
             worker = AnnouncementWorker(announcement)
-            workers[worker.id] = worker
-            workers[worker.id].start()
+            app_state.workers[worker.id] = worker
+            app_state.workers[worker.id].start()
 
     return True
 
@@ -27,33 +30,37 @@ def start():
 def stop():
     """Stop all running workers. Returns True if successful"""
 
-    global workers
+    app_state = AppState.get_instance()
 
     # Check if the workers dictionary is empty
-    if not workers:
+    if not app_state.workers:
         logger.warning("Tried to stop workers when no workers exist")
         return False
 
-    for key in workers:
-        workers[key].stop_event.set()
+    for key in app_state.workers:
+        app_state.workers[key].stop_event.set()
     
-    workers = {}
+    app_state.workers = {}
     return True
 
 
 def update():
     """Stops and re-creates all workers so they are updated with the latest system changes"""
+
+    app_state = AppState.get_instance()
     
-    if appState.active:
+    if app_state.active:
         logger.debug("Updating workers")
         stop()
         start()
 
 
-def initialSetup():
+def initial_setup():
     """Runs the initial setup for the app after the config has been loaded"""
 
-    if appState.active:
+    app_state = AppState.get_instance()
+
+    if app_state.active:
         logger.info('BananaBot is ACTIVE. Starting workers')
         start()
 
@@ -61,16 +68,18 @@ def initialSetup():
 def toggle_status():
     """Toggles the status of the system (active). Returns the new value of active"""
 
-    if not appState.active:
-        appState.active = True
+    app_state = AppState.get_instance()
+
+    if not app_state.active:
+        app_state.active = True
         start()
         logger.info("BananaBot is now ACTIVE")
     else:
-        appState.active = False
+        app_state.active = False
         stop()
         logger.info("BananaBot is now INACTIVE")
     
-    saveConfig(appState)
+    AppState.save_state(AppState)
 
 
 def string_to_time(new_time: str):
@@ -90,20 +99,24 @@ def send_message(text: str):
         The message that will be sent
     """
 
+    app_state = AppState.get_instance()
+
     json_data = {
         'text': text
     }
 
     # POST Request to send message
     logger.info(f"Sending request with message: {text}")
-    requests.post(appState.url, json=json_data, verify=False)
+    requests.post(app_state.url, json=json_data, verify=False)
 
 
 def add_worker(announcement: Announcement):
-    if appState.active:
+    app_state = AppState.get_instance()
+
+    if app_state.active:
         worker = AnnouncementWorker(announcement)
-        workers[worker.id] = worker
-        workers[worker.id].start()
+        app_state.workers[worker.id] = worker
+        app_state.workers[worker.id].start()
 
 
 def remove_announcement(id: str):
@@ -112,18 +125,20 @@ def remove_announcement(id: str):
     if id == 'banana_time':
         logger.warning("Attempted to remove the banana time announcement. This action is not permitted")
         return False
+
+    app_state = AppState.get_instance()
     
-    if id not in appState.announcements:
+    if id not in app_state.announcements:
         logger.warning("Attempted to remove a non-existent announcement")
         return False
 
-    appState.announcements.pop(id)
+    app_state.announcements.pop(id)
 
-    if appState.active:
+    if app_state.active:
         logger.debug(f"Terminating worker with ID {id}")
-        workers[id].stop_event.set()
-        workers.pop(id)
+        app_state.workers[id].stop_event.set()
+        app_state.workers.pop(id)
 
     logger.info(f"Announcement with ID {id} has been removed")
-    saveConfig(appState)
+    AppState.save_state(AppState)
     return True

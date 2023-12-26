@@ -1,1 +1,1 @@
-from .utilities import initialSetup, start, stop, toggle_status, string_to_time, update, send_message, add_worker, remove_announcement 
+from .utilities import initial_setup, start, stop, toggle_status, string_to_time, update, send_message, add_worker, remove_announcement 

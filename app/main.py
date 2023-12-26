@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-# Loads all the app code
+from models import AppState
 from api import endpoints
-from utilities import initialSetup
+from utilities import initial_setup
+
+# Call get_instance to ensure config is loaded
+AppState.get_instance()
 
 # Call update to start workers if app is ACTIVE
-initialSetup()
+initial_setup()
 
 app = FastAPI(docs_url=None, redoc_url=None)
 

@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from models import Announcement, AnnouncementData, BananaTimeData, SelectedDaysData, appState, saveConfig
+from models import Announcement, AnnouncementData, BananaTimeData, SelectedDaysData, AppState
 from utilities import toggle_status, string_to_time, update, add_worker, remove_announcement, send_message
 
 router = APIRouter()
@@ -17,16 +17,18 @@ security = HTTPBasic()
 templates = Jinja2Templates(directory="templates")
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    app_state = AppState.get_instance()
+
     # Validate username
     current_username_bytes = credentials.username.encode("utf8")
     is_correct_username = secrets.compare_digest(
-        current_username_bytes, appState.username
+        current_username_bytes, app_state.username
     )
 
     # Validate hashed passwords 
-    current_password_bytes = bcrypt.hashpw(credentials.password.encode("utf8"), appState.salt)
+    current_password_bytes = bcrypt.hashpw(credentials.password.encode("utf8"), app_state.salt)
     is_correct_password = secrets.compare_digest(
-        current_password_bytes, appState.password
+        current_password_bytes, app_state.password
     )
 
     # Throw exception if credentials are incorrect
@@ -51,18 +53,21 @@ async def get_profile_picture():
 
 @router.get('/status', status_code=status.HTTP_200_OK)
 def get_status(dependencies = Depends(get_current_user)):
-    return appState.active
+    app_state = AppState.get_instance()
+    return app_state.active
 
 
 @router.post('/toggle-status', status_code=status.HTTP_200_OK)
 def update_status(dependencies = Depends(get_current_user)):
     toggle_status()
-    return appState.active
+    app_state = AppState.get_instance()
+    return app_state.active
 
 
 @router.get('/banana-time', status_code=status.HTTP_200_OK)
 def get_banana_time():
-    return appState.banana_time
+    app_state = AppState.get_instance()
+    return app_state.banana_time
 
 
 @router.post('/banana-time', status_code=status.HTTP_200_OK)
@@ -73,18 +78,20 @@ def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(ge
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unrecognised announcement type"
         )
-    
-    appState.banana_time = string_to_time(banana_time_data.time)
-    appState.announcements['banana_time'].time = string_to_time(banana_time_data.time)
+
+    app_state = AppState.get_instance()
+    app_state.banana_time = string_to_time(banana_time_data.time)
+    app_state.announcements['banana_time'].time = string_to_time(banana_time_data.time)
     
     update()
-    saveConfig(appState)
-    return appState.banana_time
+    AppState.save_state(AppState)
+    return app_state.banana_time
 
 
 @router.get('/banana-text', status_code=status.HTTP_200_OK)
 def get_banana_text():
-    return appState.announcements['banana_time'].text
+    app_state = AppState.get_instance()
+    return app_state.announcements['banana_time'].text
 
 
 @router.post('/banana-text', status_code=status.HTTP_200_OK)
@@ -96,14 +103,16 @@ def post_banana_text(banana_time_data: BananaTimeData, dependencies = Depends(ge
             detail="Unrecognised announcement type"
         )
 
-    appState.announcements['banana_time'].text = banana_time_data.text
-    saveConfig(appState)
-    return appState.announcements['banana_time'].text
+    app_state = AppState.get_instance()
+    app_state.announcements['banana_time'].text = banana_time_data.text
+    AppState.save_state(AppState)
+    return app_state.announcements['banana_time'].text
 
 
 @router.get('/selected-days', status_code=status.HTTP_200_OK)
 def get_selected_days(dependencies = Depends(get_current_user)):
-    return appState.selected_days
+    app_state = AppState.get_instance()
+    return app_state.selected_days
 
 
 @router.post('/selected-days', status_code=status.HTTP_200_OK)
@@ -118,16 +127,18 @@ def post_selected_days(new_days: SelectedDaysData, dependencies = Depends(get_cu
         "sunday": new_days.sunday == "on"
     }
 
-    appState.selected_days = new_days
+    app_state = AppState.get_instance()
+    app_state.selected_days = new_days
 
     update()
-    saveConfig(appState)
-    return appState.selected_days
+    AppState.save_state(AppState)
+    return app_state.selected_days
 
 
 @router.get('/announcements')
 def get_announcements(dependencies = Depends(get_current_user)):
-    return appState.announcements
+    app_state = AppState.get_instance()
+    return app_state.announcements
 
 
 @router.post('/announcements', status_code=status.HTTP_201_CREATED)
@@ -137,25 +148,27 @@ def post_announcement(announcement: AnnouncementData, dependencies = Depends(get
         case 'time':
             # Create the new announcement and save the state
             new_announcement = Announcement(announcement.text, time=string_to_time(announcement.time))
-            appState.announcements[new_announcement.id] = new_announcement
-            saveConfig(appState)
+            app_state = AppState.get_instance()
+            app_state.announcements[new_announcement.id] = new_announcement
+            AppState.save_state(AppState)
 
             # Add a worker if the app is active
-            if appState.active:
-                add_worker(appState.announcements[new_announcement.id])
+            if app_state.active:
+                add_worker(app_state.announcements[new_announcement.id])
 
-            return appState.announcements[new_announcement.id]
+            return app_state.announcements[new_announcement.id]
         case 'mins_before':
             # Create the new announcement and save the state
             new_announcement = Announcement(announcement.text, mins_before=announcement.mins_before)
-            appState.announcements[new_announcement.id] = new_announcement
-            saveConfig(appState)
+            app_state = AppState.get_instance()
+            app_state.announcements[new_announcement.id] = new_announcement
+            AppState.save_state(AppState)
 
             # Add a worker if the app is active
-            if appState.active:
-                add_worker(appState.announcements[new_announcement.id])
+            if app_state.active:
+                add_worker(app_state.announcements[new_announcement.id])
 
-            return appState.announcements[new_announcement.id]
+            return app_state.announcements[new_announcement.id]
         case 'instant':
             send_message(announcement.text)
             return
@@ -185,16 +198,18 @@ async def get_healthcheck():
 #### Web Pages ####
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    app_state: AppState = AppState.get_instance()
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "banana_time": appState.banana_time.strftime("%H:%M")
+        "banana_time": app_state.banana_time.strftime("%H:%M")
         })
 
 
 @router.get("/admin", response_class=HTMLResponse)
 async def admin(request: Request, dependencies = Depends(get_current_user)):
+    app_state: AppState = AppState.get_instance()
     return templates.TemplateResponse("admin.html", {
         "request": request,
-        "status": appState.active,
-        "selected_days": appState.selected_days
+        "status": app_state.active,
+        "selected_days": app_state.selected_days
     })
