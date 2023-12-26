@@ -2,14 +2,13 @@ import secrets
 import bcrypt
 
 from fastapi import APIRouter
-from fastapi import status, Request, Depends, HTTPException, Body
+from fastapi import status, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from models import Announcement, AnnouncementData, BananaTimeData, SelectedDaysData, AppState
-from utilities import toggle_status, string_to_time, update, add_worker, remove_announcement, send_message
+from models import AnnouncementData, BananaTimeData, SelectedDaysData, AppState
+from utilities import toggle_status, update_banana_time, remove_announcement, add_announcement, update_banana_text, update_selected_days
 
 router = APIRouter()
 security = HTTPBasic()
@@ -76,16 +75,10 @@ def post_banana_time(banana_time_data: BananaTimeData, dependencies = Depends(ge
     if(banana_time_data.time == None):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Unrecognised announcement type"
+            detail="No time was received with the data"
         )
-
-    app_state = AppState.get_instance()
-    app_state.banana_time = string_to_time(banana_time_data.time)
-    app_state.announcements['banana_time'].time = string_to_time(banana_time_data.time)
     
-    update()
-    AppState.save_state(AppState)
-    return app_state.banana_time
+    return update_banana_time(banana_time_data)
 
 
 @router.get('/banana-text', status_code=status.HTTP_200_OK)
@@ -100,13 +93,10 @@ def post_banana_text(banana_time_data: BananaTimeData, dependencies = Depends(ge
     if(banana_time_data.text == None):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Unrecognised announcement type"
+            detail="No banana time text data was received"
         )
-
-    app_state = AppState.get_instance()
-    app_state.announcements['banana_time'].text = banana_time_data.text
-    AppState.save_state(AppState)
-    return app_state.announcements['banana_time'].text
+    
+    return update_banana_text(banana_time_data)
 
 
 @router.get('/selected-days', status_code=status.HTTP_200_OK)
@@ -117,22 +107,7 @@ def get_selected_days(dependencies = Depends(get_current_user)):
 
 @router.post('/selected-days', status_code=status.HTTP_200_OK)
 def post_selected_days(new_days: SelectedDaysData, dependencies = Depends(get_current_user)):
-    new_days = {
-        "monday": new_days.monday == "on",
-        "tuesday": new_days.tuesday == "on",
-        "wednesday": new_days.wednesday == "on",
-        "thursday": new_days.thursday == "on",
-        "friday": new_days.friday == "on",
-        "saturday": new_days.saturday == "on",
-        "sunday": new_days.sunday == "on"
-    }
-
-    app_state = AppState.get_instance()
-    app_state.selected_days = new_days
-
-    update()
-    AppState.save_state(AppState)
-    return app_state.selected_days
+    return update_selected_days(new_days)
 
 
 @router.get('/announcements')
@@ -143,41 +118,15 @@ def get_announcements(dependencies = Depends(get_current_user)):
 
 @router.post('/announcements', status_code=status.HTTP_201_CREATED)
 def post_announcement(announcement: AnnouncementData, dependencies = Depends(get_current_user)):
-    # Note: This logic could probably be moved to utilities to keep the endpoints file a bit cleaner
-    match announcement.type:
-        case 'time':
-            # Create the new announcement and save the state
-            new_announcement = Announcement(announcement.text, time=string_to_time(announcement.time))
-            app_state = AppState.get_instance()
-            app_state.announcements[new_announcement.id] = new_announcement
-            AppState.save_state(AppState)
-
-            # Add a worker if the app is active
-            if app_state.active:
-                add_worker(app_state.announcements[new_announcement.id])
-
-            return app_state.announcements[new_announcement.id]
-        case 'mins_before':
-            # Create the new announcement and save the state
-            new_announcement = Announcement(announcement.text, mins_before=announcement.mins_before)
-            app_state = AppState.get_instance()
-            app_state.announcements[new_announcement.id] = new_announcement
-            AppState.save_state(AppState)
-
-            # Add a worker if the app is active
-            if app_state.active:
-                add_worker(app_state.announcements[new_announcement.id])
-
-            return app_state.announcements[new_announcement.id]
-        case 'instant':
-            send_message(announcement.text)
-            return
-        
-    # Raise exception if the type is unknown
-    raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unrecognised announcement type"
-        )
+    response = add_announcement(announcement)
+    if (response == False):
+        # Raise exception if the type is unknown
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unrecognised announcement type"
+            )
+    else:
+        return response
 
 
 @router.delete('/announcements/{announcement_id}', status_code=status.HTTP_200_OK)
@@ -188,7 +137,7 @@ def delete_announcement(announcement_id: str, dependencies = Depends(get_current
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Could not remove announcement"
             )
-    
+
 
 @router.get('/healthcheck', status_code=status.HTTP_200_OK)
 async def get_healthcheck():

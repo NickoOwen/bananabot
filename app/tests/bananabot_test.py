@@ -1,6 +1,6 @@
 from main import *
 from models import *
-from models.app_config import generateDefaultConfig, configuration_file, saveConfig, loadConfig, workers, appState
+from app.models.app_state import generateDefaultConfig, configuration_file, saveConfig, loadConfig, workers, appState
 from utilities import *
 from api.endpoints import *
 

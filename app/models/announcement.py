@@ -7,7 +7,7 @@ import logging
 
 # Use FastAPI's default logger
 logger = logging.getLogger("uvicorn")
-logger.name = 'utilities'
+logger.name = 'announcements'
 
 #### Announcement ####
 class Announcement:
@@ -123,7 +123,7 @@ class AnnouncementWorker(threading.Thread):
 
             # Break the loop if the threads have been ordered to stop
             if self.stop_event.is_set():
-                logger.info(f"Announcement {str(self.id)} stopping...")
+                logger.info(f"AnnouncementWorker with ID {str(self.id)} is stopping")
                 break
 
             # Check the current day and send message if required
@@ -136,7 +136,7 @@ class AnnouncementWorker(threading.Thread):
             # Sleep until next day warning
             self.stop_event.wait(1)
             if self.stop_event.is_set():
-                logger.info(f"Announcement {str(self.id)} stopping...")
+                logger.info(f"AnnouncementWorker with ID {str(self.id)} is stopping")
                 break
 
 

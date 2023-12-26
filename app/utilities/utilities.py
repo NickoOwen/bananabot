@@ -2,7 +2,7 @@ import datetime
 import time
 import requests
 
-from models import Announcement, AnnouncementWorker, AppState
+from models import Announcement, AnnouncementWorker, AppState, AnnouncementData, BananaTimeData, SelectedDaysData
 import logging
 
 # Use FastAPI's default logger
@@ -90,6 +90,46 @@ def string_to_time(new_time: str):
     return datetime.time(hour = t.tm_hour, minute = t.tm_min)
 
 
+def update_banana_text(banana_time_data: BananaTimeData):
+    app_state = AppState.get_instance()
+    app_state.announcements['banana_time'].text = banana_time_data.text
+    AppState.save_state(AppState)
+
+    logger.info(f'New banana time text: {app_state.announcements["banana_time"].text}')
+    return app_state.announcements['banana_time'].text
+
+
+def update_banana_time(banana_time_data: BananaTimeData):
+    app_state = AppState.get_instance()
+    app_state.banana_time = string_to_time(banana_time_data.time)
+    app_state.announcements['banana_time'].time = string_to_time(banana_time_data.time)
+    
+    update()
+    logger.info(f'New banana time: {app_state.banana_time}')
+    AppState.save_state(AppState)
+    return app_state.banana_time
+
+
+def update_selected_days(new_days: SelectedDaysData):
+    new_days = {
+        "monday": new_days.monday == "on",
+        "tuesday": new_days.tuesday == "on",
+        "wednesday": new_days.wednesday == "on",
+        "thursday": new_days.thursday == "on",
+        "friday": new_days.friday == "on",
+        "saturday": new_days.saturday == "on",
+        "sunday": new_days.sunday == "on"
+    }
+
+    app_state = AppState.get_instance()
+    app_state.selected_days = new_days
+
+    update()
+    logger.info("Selected days have been updated")
+    AppState.save_state(AppState)
+    return app_state.selected_days
+
+
 def send_message(text: str):
     """
     Sends the provided text using a POST request
@@ -118,6 +158,40 @@ def add_worker(announcement: Announcement):
         worker = AnnouncementWorker(announcement)
         app_state.workers[worker.id] = worker
         app_state.workers[worker.id].start()
+
+
+def add_announcement(announcement: AnnouncementData):
+    match announcement.type:
+        case 'time':
+            # Create the new announcement and save the state
+            new_announcement = Announcement(announcement.text, time=string_to_time(announcement.time))
+            app_state = AppState.get_instance()
+            app_state.announcements[new_announcement.id] = new_announcement
+            AppState.save_state(AppState)
+
+            # Add a worker if the app is active
+            if app_state.active:
+                add_worker(app_state.announcements[new_announcement.id])
+
+            return app_state.announcements[new_announcement.id]
+        case 'mins_before':
+            # Create the new announcement and save the state
+            new_announcement = Announcement(announcement.text, mins_before=announcement.mins_before)
+            app_state = AppState.get_instance()
+            app_state.announcements[new_announcement.id] = new_announcement
+            AppState.save_state(AppState)
+
+            # Add a worker if the app is active
+            if app_state.active:
+                add_worker(app_state.announcements[new_announcement.id])
+
+            return app_state.announcements[new_announcement.id]
+        case 'instant':
+            send_message(announcement.text)
+            return True
+        
+    # Return False if no match (i.e. Unknown type)
+    return False
 
 
 def remove_announcement(id: str):

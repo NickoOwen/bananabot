@@ -12,7 +12,7 @@ import logging
 
 # Use FastAPI's default logger
 logger = logging.getLogger("uvicorn")
-logger.name = 'utilities'
+logger.name = 'app_state'
 
 def string_to_time(new_time: str):
     """Takes a string as input and returns a datetime.time object"""
