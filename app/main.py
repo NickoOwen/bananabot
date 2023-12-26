@@ -8,6 +8,7 @@ from utilities import initial_setup, stop
 # Load the app
 AppState.get_instance()
 initial_setup()
+AppState.save_state(AppState)
 
 app = FastAPI(docs_url=None, redoc_url=None)
 

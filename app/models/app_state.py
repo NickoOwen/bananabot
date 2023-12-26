@@ -54,7 +54,6 @@ class AppState:
     def get_instance(cls):
         if cls._instance is None:
             cls._instance = cls._load_state()
-            cls.save_state(cls)
 
         return cls._instance
     
