@@ -216,7 +216,7 @@ $(document).on('submit', '#banana-time-text-form', function(e) {
         // Update the form with the new text
         success: function (data, status, xhr) {
             document.getElementById("banana-time-text-input").value = data;
-            alert("Success: New Banana Time message set");
+            alert(`Success: Banana Time message is now '${data}'`);
         },
 
         // Create a popup if the server returns an error
@@ -471,7 +471,7 @@ async function showAnnouncements() {
         const value = announcements[key];
 
         // Check if announcement is a Minutes Before Announcement
-        if (value.hasOwnProperty("mins_before")) {
+        if (value.type == "mins_before") {
             announcementTable += `
                 <tr id="announcement-id-${value.id}">
                     <input type="hidden" name="announcement_id" value="${value.id}">
