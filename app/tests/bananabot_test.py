@@ -14,7 +14,6 @@ from fastapi.testclient import TestClient
 import pytest
 import datetime
 
-# Function to remove the config directory after each test
 @pytest.fixture(autouse=True)
 def cleanup():
     # Reset AppState class variables
@@ -105,7 +104,6 @@ class TestDefaultConfig():
 
 class TestConfigFunctions():
     def test_save_state_succeeds(self):
-        # Test save_state
         try:
             AppState.save_state(AppState)
         except Exception as e:
@@ -114,7 +112,6 @@ class TestConfigFunctions():
             assert True, "save_state succeeded without any exceptions"
 
     def test_load_state_succeeds(self):
-        # Test _load_state
         try:
             test_state = AppState._load_state()
             assert test_state is not None

@@ -9,8 +9,6 @@ import logging
 logger = logging.getLogger("uvicorn")
 logger.name = 'utilities'
 
-
-
 def start():
     """Creates all the workers using the data from announcements. Returns True if successful"""
 

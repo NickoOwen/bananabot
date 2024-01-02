@@ -55,7 +55,7 @@ Download and install Python `v3.10.10`
 
 ## Usage
 
-1. Set the `url` class variable in [app/models/app_config.py](./app/models/app_config.py) to your [webhook](https://api.slack.com/messaging/webhooks). (Note this is hard coded intentionally to avoid the potential for misuse)
+1. Set the `url` class variable in [app/models/app_state.py](./app/models/app_state.py) to your [webhook](https://api.slack.com/messaging/webhooks). (Note this is hard coded intentionally to avoid the potential for misuse)
 
 2. [Build](#building) and [deploy](#deploying) the app
 

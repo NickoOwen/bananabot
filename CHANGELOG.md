@@ -8,10 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 #### Added
-- The ability to store state to enable persistence across container / app reboots
+- Ability to change set the password via the administrator interface
+- A cool animation on the BananaBot home page when it reaches BananaTime
 
-## [4.1.1] - 2023-09-05
-- Updated requirements.txt with later versions to address security vulnerabilities
+## [4.2.0] - 2024-01-02
+
+#### Added
+- Implemented storing the application state to enable persistence between restarts, recovery from failure etc.
+- Some small quality of life improvements in the admin UI
+
+#### Fixed
+- Fixed requirement conflicts introduced in the 4.1.1 release
+- Major refactor of the code structure to make it more readable and maintainable
+- Addressed security issues with Python dependencies
 
 ## [4.1.0] - 2023-06-01
 - Updated the admin user interface
