@@ -145,8 +145,13 @@ def send_message(text: str):
     }
 
     # POST Request to send message
-    logger.info(f"Sending request with message: {text}")
-    requests.post(app_state.url, json=json_data, verify=False)
+    try:
+        logger.info(f"Sending request with message: {text}")
+        requests.post(app_state.url, json=json_data, verify=False)
+    except Exception as e:
+        logger.error(f"An error occurred while sending the POST request: {e}")
+        # Restart workers in the event of an exception
+        update()
 
 
 def add_worker(announcement: Announcement):

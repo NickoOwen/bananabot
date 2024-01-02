@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 #### Added
-- Ability to change set the password via the administrator interface
-- A cool animation on the BananaBot home page when it reaches BananaTime
+- The ability to set the password via the administrator interface
+- A cool animation on the BananaBot home page when it reaches banana time
 
 ## [4.2.0] - 2024-01-02
 

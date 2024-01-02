@@ -153,7 +153,6 @@ class AppState:
         for announcement in app_state.announcements.values():
             yaml_announcements.append(serialiseAnnouncement(announcement))
 
-
         # Create a dictionary with the variables
         serialised_config = {
             'banana_time': app_state.banana_time.strftime('%H:%M'),
