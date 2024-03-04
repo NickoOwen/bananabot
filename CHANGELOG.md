@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The ability to set the password via the administrator interface
 - A cool animation on the BananaBot home page when it reaches banana time
 
+## [4.2.1] - 2024-03-04
+
+#### Fixed
+- Updated Python packages to address security issues
+
 ## [4.2.0] - 2024-01-02
 
 #### Added
